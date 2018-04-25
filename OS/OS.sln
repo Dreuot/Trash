@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27130.2024
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OS", "OS\OS.csproj", "{2AD28970-DFEF-476F-9376-534C7063F5E0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NtfsLib", "NtfsLib\NtfsLib.csproj", "{84EE5A0F-6D74-42B3-8D59-E7055184CB0C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2AD28970-DFEF-476F-9376-534C7063F5E0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2AD28970-DFEF-476F-9376-534C7063F5E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2AD28970-DFEF-476F-9376-534C7063F5E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2AD28970-DFEF-476F-9376-534C7063F5E0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{84EE5A0F-6D74-42B3-8D59-E7055184CB0C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{84EE5A0F-6D74-42B3-8D59-E7055184CB0C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{84EE5A0F-6D74-42B3-8D59-E7055184CB0C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{84EE5A0F-6D74-42B3-8D59-E7055184CB0C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {20A01865-A8F3-4DC0-956D-F07F6F0C27DF}
+	EndGlobalSection
+EndGlobal
