@@ -74,6 +74,7 @@ namespace NtfsLib
                     byte NumByteInRunOffset = (byte)(RunListCurrentByte >> 4);
                     byte NumByteInRunLen = (byte)(RunListCurrentByte & 0x0F);
                     currenrRunList++;
+                    int currentSeg = 0;
                     do
                     {
                         LineSegment seg = new LineSegment();
@@ -90,6 +91,11 @@ namespace NtfsLib
                             currenrRunList++;
                         }
 
+                        if(currentSeg != 0)
+                        {
+                            seg.Start += Attribute.NonResident.Clusters[currentSeg - 1].Start;
+                        }
+
                         seg.End = seg.Start + (ulong)segmentLength;
 
                         Attribute.NonResident.Clusters.Add(seg);
@@ -97,6 +103,7 @@ namespace NtfsLib
                         NumByteInRunOffset = (byte)(RunListCurrentByte >> 4);
                         NumByteInRunLen = (byte)(RunListCurrentByte & 0x0F);
                         currenrRunList++;
+                        currentSeg++;
                     } while (RunListCurrentByte != 0);
                 }
 

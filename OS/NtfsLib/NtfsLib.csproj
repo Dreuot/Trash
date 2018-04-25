@@ -45,6 +45,7 @@
     <Compile Include="AttributeTypes.cs" />
     <Compile Include="BPB.cs" />
     <Compile Include="HD_API.cs" />
+    <Compile Include="LineSegment.cs" />
     <Compile Include="MFT.cs" />
     <Compile Include="NonResident.cs" />
     <Compile Include="NTFS.cs" />
