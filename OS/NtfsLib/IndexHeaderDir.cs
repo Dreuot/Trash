@@ -1,0 +1,23 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace NtfsLib
+{
+    class IndexHeaderDir
+    {
+        /*0x00*/
+        public ulong IndexedFile { get; set; } //адрес MFT файла
+        /*0x08*/
+        public ushort Length { get; set; } //смещение следующего элемента, относительно текущего
+        /*0x0A*/
+        public ushort KeyLength { get; set; } //длина атрибута $FILE_NAME
+        /*0x0C*/
+        public int Flags { get; set; } //флаги
+        /*0x10*/
+        public byte[] FileName { get; set; }//сам атрибут $FILE_NAME, если key_length 
+                                     //больше нуля.
+    }
+}

@@ -26,6 +26,8 @@ namespace NtfsLib
         public byte[] Inner { get; private set; }
         public string FileName { get; private set; }
 
+        public ulong ParentDir { get; set; }
+
         public List<Attribute> Attributes { get; set; }
 
         public override string ToString()
@@ -54,6 +56,7 @@ namespace NtfsLib
             Inner = sector;
             FillData(sector);
             LoadAttributes(sector);
+            ParentDir = 0;
         }
 
         private void LoadAttributes(byte[] sector)
@@ -106,9 +109,17 @@ namespace NtfsLib
                         currentSeg++;
                     } while (RunListCurrentByte != 0);
                 }
+                if(Attribute.Type == AttributeTypes.AT_INDEX_ROOT)
+                {
+                    List<IndexHeaderDir> indexes = IndexElements(sector, offset, Attribute);
+                }
 
                 if (Attribute.Type == AttributeTypes.AT_FILE_NAME)
                 {
+                    ParentDir = 0;
+                    for (int i = 0; i < 6; i++)
+                        ParentDir += (ulong)sector[offset + Attribute.Resident.ValueOffset + i] << (i * 8);
+
                     byte[] chars = new byte[sector[offset + 0x58] * 2];
                     for (int i = 0; i < chars.Length; i += 2)
                         chars[i] = (byte)(sector[offset + 0x5A + i] + (sector[offset + 0x5A + i + 1] << 8));
@@ -123,6 +134,72 @@ namespace NtfsLib
                 Attribute = new Attribute(sector, offset);
                 Attributes.Add(Attribute);
             }
+        }
+
+        private List<IndexHeaderDir> IndexElements(byte[] sector, int offset, Attribute attr)
+        {
+            List<IndexHeaderDir> indexes = new List<IndexHeaderDir>();
+            int bodyOffset = attr.Resident.ValueOffset;
+            IndexRoot indexRoot = new IndexRoot();
+            for (int i = 0; i < 4; i++)
+                indexRoot.Type += (uint)sector[offset + bodyOffset + i] << (i * 8);
+
+            for (int i = 0; i < 4; i++)
+                indexRoot.CollarationRule += (uint)sector[offset + bodyOffset + i + 0x04] << (i * 8);
+
+            for (int i = 0; i < 4; i++)
+                indexRoot.IndexBlockSize += (uint)sector[offset + bodyOffset + i + 0x08] << (i * 8);
+
+            indexRoot.ClustersPerIndexBlock += sector[offset + bodyOffset + 0x0C];
+
+            indexRoot.Reserved = new byte[3];
+            for (int i = 0; i < 3; i++)
+                indexRoot.Reserved[i] = sector[offset + bodyOffset + 0x0D + i];
+
+            IndexHeader indexHeader = new IndexHeader();
+            int indexHeaderOffset = 0x10 + offset + bodyOffset;
+            for (int i = 0; i < 4; i++)
+                indexHeader.EntriesOffset += (uint)sector[indexHeaderOffset + i + 0x00] << (i * 8);
+
+            for (int i = 0; i < 4; i++)
+                indexHeader.IndexLength += (uint)sector[indexHeaderOffset + i + 0x04] << (i * 8);
+
+            for (int i = 0; i < 4; i++)
+                indexHeader.AllocatedSize += (uint)sector[indexHeaderOffset + i + 0x08] << (i * 8);
+
+            for (int i = 0; i < 4; i++)
+                indexHeader.Flags += (uint)sector[indexHeaderOffset + i + 0x0C] << (i * 8);
+
+            ulong firstIndexElement = 0x10 + indexHeader.EntriesOffset + (ulong)bodyOffset + (ulong)offset;
+            ulong current = firstIndexElement;
+
+            IndexHeaderDir ind;
+            do
+            {
+                ind = new IndexHeaderDir();
+                for (int i = 0; i < 6; i++)
+                    ind.IndexedFile += (ulong)sector[current + 0x00 + (ulong)i] << (i * 8);
+
+                for (int i = 0; i < 2; i++)
+                    ind.Length += (ushort)(sector[current + 0x08 + (ulong)i] << (i * 8));
+
+                for (int i = 0; i < 2; i++)
+                    ind.KeyLength += (ushort)(sector[current + 0x0A + (ulong)i] << (i * 8));
+
+                for (int i = 0; i < 4; i++)
+                    ind.Flags += sector[current + 0x0C + (ulong)i] << (i * 8);
+
+                ind.FileName = new byte[ind.Length - 0x10];
+                for (int i = 0; i < ind.Length - 0x10; i++)
+                    ind.FileName[i] = sector[current + 0x10 + (ulong)i];
+
+                if(ind.Flags != 2)
+                    indexes.Add(ind);
+
+                current += ind.Length;
+            } while (ind.Flags != 2);
+
+            return indexes;
         }
 
         private void FillData(byte[] sector)
