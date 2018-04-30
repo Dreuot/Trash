@@ -22,6 +22,7 @@ namespace NtfsLib
         public ushort NextAttrInstance { get; set; }
         public ushort Reserved { get; set; }
         public uint MFTRecordNumber { get; set; }
+        public uint IndexBlockSize { get; set; }
 
         public byte[] Inner { get; private set; }
         public string FileName { get; private set; }
@@ -29,6 +30,8 @@ namespace NtfsLib
         public ulong ParentDir { get; set; }
 
         public List<Attribute> Attributes { get; set; }
+        public List<IndexHeaderDir> Indexes { get; set; }
+        public NTFS NTFS { get; set; }
 
         public override string ToString()
         {
@@ -51,8 +54,10 @@ namespace NtfsLib
             return result;
         }
 
-        public MFT(byte[] sector)
+        public MFT(byte[] sector, NTFS ntfs)
         {
+            NTFS = ntfs;
+            Indexes = new List<IndexHeaderDir>();
             Inner = sector;
             FillData(sector);
             LoadAttributes(sector);
@@ -71,7 +76,7 @@ namespace NtfsLib
             {
                 if (Attribute.NonResidentFlg == 1)
                 {
-                    int runListStart = offset + Attribute.NonResident.MappingPairOffset + 1;
+                    int runListStart = offset + Attribute.NonResident.MappingPairOffset;
                     int currenrRunList = runListStart;
                     byte RunListCurrentByte = sector[currenrRunList];
                     byte NumByteInRunOffset = (byte)(RunListCurrentByte >> 4);
@@ -109,9 +114,15 @@ namespace NtfsLib
                         currentSeg++;
                     } while (RunListCurrentByte != 0);
                 }
+
                 if(Attribute.Type == AttributeTypes.AT_INDEX_ROOT)
                 {
-                    List<IndexHeaderDir> indexes = IndexElements(sector, offset, Attribute);
+                    Indexes.AddRange(IndexElements(sector, offset, Attribute));
+                }
+
+                if(Attribute.Type == AttributeTypes.AT_INDEX_ALLOCATION)
+                {
+                    Indexes.AddRange(IndexAllocationElements(this, Attribute));
                 }
 
                 if (Attribute.Type == AttributeTypes.AT_FILE_NAME)
@@ -136,6 +147,98 @@ namespace NtfsLib
             }
         }
 
+        public List<IndexHeaderDir> IndexAllocationElements(MFT mft, Attribute attr)
+        {
+            if (attr.Type != AttributeTypes.AT_INDEX_ALLOCATION)
+                throw new ArgumentException("Incorrect type of attribute");
+            var bpb = NTFS.BPB;
+            int bytePerCluster = bpb.BytePerSec * bpb.SectorPerCluster;
+
+            List<IndexHeaderDir> indexes = new List<IndexHeaderDir>();
+            for (int i = 0; i < attr.NonResident.Clusters.Count; i++)
+            {
+                int curClus = (int)attr.NonResident.Clusters[i].Start;
+                int clusters = (int)(attr.NonResident.Clusters[i].End - attr.NonResident.Clusters[i].Start);
+                byte[] run = new byte[clusters * (uint)bytePerCluster];
+                List<byte> list = new List<byte>();
+                for (int j = 0; j < clusters; j++)
+                {
+                    list.AddRange(NTFS.ReadCluster(curClus));
+                    curClus++;
+                }
+
+                run = list.ToArray();
+
+                int offset = 0;
+                IndexAllocation ia = new IndexAllocation();
+                ia.Signature = new byte[4];
+                for (int j = 0; j < 4; j++)
+                    ia.Signature[j] = run[offset + j];
+
+                for (int j = 0; j < 2; j++)
+                    ia.UsaOffset += (ushort)(run[offset + 0x04 + j] << (j * 8));
+
+                for (int j = 0; j < 2; j++)
+                    ia.UsaCount += (ushort)(run[offset + 0x06 + j] << (j * 8));
+
+                for (int j = 0; j < 8; j++)
+                    ia.Lsn += (ulong)run[offset + 0x08 + j] << (j * 8);
+
+                for (int j = 0; j < 8; j++)
+                    ia.IndexBlockVCN += (ulong)run[offset + 0x10 + j] << (j * 8);
+
+                IndexHeader ih = new IndexHeader();
+                offset += 0x18;
+                for (int j = 0; j < 4; j++)
+                    ih.EntriesOffset += (uint)run[offset + j + 0x00] << (j * 8);
+
+                for (int j = 0; j < 4; j++)
+                    ih.IndexLength += (uint)run[offset + j + 0x04] << (j * 8);
+
+                for (int j = 0; j < 4; j++)
+                    ih.AllocatedSize += (uint)run[offset + j + 0x08] << (j * 8);
+
+                for (int j = 0; j < 4; j++)
+                    ih.Flags += (uint)run[offset + j + 0x0C] << (j * 8);
+
+                offset += (int)ih.EntriesOffset;
+
+                int count = (int)(run.Length / mft.IndexBlockSize);
+
+                IndexHeaderDir ind;
+                do
+                //for (int k = 0; k < count; k++)
+                {
+                    ind = new IndexHeaderDir();
+                    for (int j = 0; j < 6; j++)
+                        ind.IndexedFile += (ulong)run[(uint)offset + 0x00 + (ulong)j] << (j * 8);
+
+                    for (int j = 0; j < 2; j++)
+                        ind.Length += (ushort)(run[(uint)offset + 0x08 + (ulong)j] << (j * 8));
+
+                    for (int j = 0; j < 2; j++)
+                        ind.KeyLength += (ushort)(run[(uint)offset + 0x0A + (ulong)j] << (j * 8));
+
+                    for (int j = 0; j < 4; j++)
+                        ind.Flags += run[(uint)offset + 0x0C + (ulong)j] << (j * 8);
+
+                    ind.FileName = new byte[ind.Length - 0x10];
+                    for (int j = 0; j < ind.Length - 0x10; j++)
+                        ind.FileName[j] = run[(uint)offset + 0x10 + (ulong)j];
+
+                    var fn = ind.FileNameString;
+
+                    if (ind.Flags != 2)
+                        indexes.Add(ind);
+
+                    offset += ind.Length;
+                } while (ind.Flags != 2);
+            }
+
+
+            return indexes;
+        }
+
         private List<IndexHeaderDir> IndexElements(byte[] sector, int offset, Attribute attr)
         {
             List<IndexHeaderDir> indexes = new List<IndexHeaderDir>();
@@ -155,6 +258,8 @@ namespace NtfsLib
             indexRoot.Reserved = new byte[3];
             for (int i = 0; i < 3; i++)
                 indexRoot.Reserved[i] = sector[offset + bodyOffset + 0x0D + i];
+
+            IndexBlockSize = indexRoot.IndexBlockSize;
 
             IndexHeader indexHeader = new IndexHeader();
             int indexHeaderOffset = 0x10 + offset + bodyOffset;
@@ -189,15 +294,15 @@ namespace NtfsLib
                 for (int i = 0; i < 4; i++)
                     ind.Flags += sector[current + 0x0C + (ulong)i] << (i * 8);
 
-                ind.FileName = new byte[ind.Length - 0x10];
-                for (int i = 0; i < ind.Length - 0x10; i++)
+                ind.FileName = new byte[ind.KeyLength];
+                for (int i = 0; i < ind.KeyLength; i++)
                     ind.FileName[i] = sector[current + 0x10 + (ulong)i];
 
                 if(ind.Flags != 2)
                     indexes.Add(ind);
 
                 current += ind.Length;
-            } while (ind.Flags != 2);
+            } while (ind.Flags == 1);
 
             return indexes;
         }

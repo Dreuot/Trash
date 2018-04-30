@@ -58,6 +58,7 @@ namespace NtfsLib
 
         private void ReadBPB()
         {
+            bootSector = LoadBootSector();
             byte[] sector = BootSector;
             Signature = "";
             for (int i = 0; i < 8; i++)
@@ -104,7 +105,7 @@ namespace NtfsLib
             };
 
             return bytes;
-        }
+       }
 
         public override string ToString()
         {

@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using NtfsLib;
 
 namespace OS
 {
@@ -15,6 +16,13 @@ namespace OS
         public Form1()
         {
             InitializeComponent();
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            NTFS ntfs = new NTFS("C:\\");
+            var rec = ntfs.ReturnMFTRecord(5);
+            var x = 1;
         }
     }
 }

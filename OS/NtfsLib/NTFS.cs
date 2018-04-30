@@ -77,6 +77,17 @@ namespace NtfsLib
             return _ReadSector(sectorNum);
         }
 
+        public byte[] ReadCluster(int cluster)
+        {
+            byte[] ByteRecord = new byte[BPB.SectorPerCluster * BPB.BytePerSec];
+            for (int i = 0; i < ByteRecord.Length / 512; i++)
+            {
+                Array.Copy(ReadSector((int)(cluster * BPB.SectorPerCluster) + i), 0, ByteRecord, i * BPB.BytePerSec, BPB.BytePerSec);
+            }
+
+            return ByteRecord;
+        }
+
         public MFT ReturnMFTRecord(int indexMFT)
         {
             byte[] ByteRecord = new byte[(int)Math.Pow(2, BPB.ClustersPerMFT * -1)];
@@ -85,7 +96,7 @@ namespace NtfsLib
                 Array.Copy(ReadSector((int)(BPB.FirstClusterMFT * BPB.SectorPerCluster) + indexMFT * 2 + i), 0, ByteRecord, i * BPB.BytePerSec, BPB.BytePerSec);
             }
 
-            return new MFT(ByteRecord);
+            return new MFT(ByteRecord, this);
         }
     }
 }

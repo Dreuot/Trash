@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace NtfsLib
 {
-    class IndexHeaderDir
+    public class IndexHeaderDir
     {
         /*0x00*/
         public ulong IndexedFile { get; set; } //адрес MFT файла
@@ -19,5 +19,16 @@ namespace NtfsLib
         /*0x10*/
         public byte[] FileName { get; set; }//сам атрибут $FILE_NAME, если key_length 
                                      //больше нуля.
+
+        public string FileNameString
+        {
+            get
+            {
+                char[] chars = new char[FileName.Length];
+                Encoding.Unicode.GetChars(FileName, 0, chars.Length, chars, 0);
+
+                return new string(chars);
+            }
+        }
     }
 }

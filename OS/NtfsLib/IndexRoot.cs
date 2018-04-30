@@ -18,7 +18,7 @@ namespace NtfsLib
         public byte ClustersPerIndexBlock { get; set; }//size of each index block (record) in clusters 
                                                        //либо логарифм размера
                                                        /*0x0D*/
-        public byte[] Reserved { get; set; }; //unused
+        public byte[] Reserved { get; set; } //unused
         /*0x10*/
         public IndexHeader Index { get; set; } //заголовок индексного узла
     }

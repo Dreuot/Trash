@@ -45,6 +45,7 @@
     <Compile Include="AttributeTypes.cs" />
     <Compile Include="BPB.cs" />
     <Compile Include="HD_API.cs" />
+    <Compile Include="IndexAllocation.cs" />
     <Compile Include="IndexHeader.cs" />
     <Compile Include="IndexHeaderDir.cs" />
     <Compile Include="IndexRoot.cs" />

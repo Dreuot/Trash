@@ -36,35 +36,37 @@ namespace NtfsLib
                 t += sector[offset + i] << (i * 8);
 
             Type = (AttributeTypes)t;
+            if (Type != AttributeTypes.AT_END)
+            {
+                Length = 0;
+                for (int i = 0; i < 2; i++)
+                    Length += (ushort)(sector[offset + 0x04 + i] << (i * 8));
 
-            Length = 0;
-            for (int i = 0; i < 2; i++)
-                Length += (ushort)(sector[offset + 0x04 + i] << (i * 8));
+                Reserved = 0;
+                for (int i = 0; i < 2; i++)
+                    Reserved += (ushort)(sector[offset + 0x06 + i] << (i * 8));
 
-            Reserved = 0;
-            for (int i = 0; i < 2; i++)
-                Reserved += (ushort)(sector[offset + 0x06 + i] << (i * 8));
+                NonResidentFlg = sector[offset + 0x08];
 
-            NonResidentFlg = sector[offset + 0x08];
+                NameLength = sector[offset + 0x09];
 
-            NameLength = sector[offset + 0x09];
+                NameOffset = 0;
+                for (int i = 0; i < 2; i++)
+                    NameOffset += (ushort)(sector[offset + 0x0A + i] << (i * 8));
 
-            NameOffset = 0;
-            for (int i = 0; i < 2; i++)
-                NameOffset += (ushort)(sector[offset + 0x0A + i] << (i * 8));
+                Flags = 0;
+                for (int i = 0; i < 2; i++)
+                    Flags += (ushort)(sector[offset + 0x0C + i] << (i * 8));
 
-            Flags = 0;
-            for (int i = 0; i < 2; i++)
-                Flags += (ushort)(sector[offset + 0x0C + i] << (i * 8));
+                Instance = 0;
+                for (int i = 0; i < 2; i++)
+                    Instance += (ushort)(sector[offset + 0x0E + i] << (i * 8));
 
-            Instance = 0;
-            for (int i = 0; i < 2; i++)
-                Instance += (ushort)(sector[offset + 0x0E + i] << (i * 8));
-
-            if (NonResidentFlg == 1)
-                NonResident = new NonResident(sector, offset);
-            else
-                Resident = new Resident(sector, offset);
+                if (NonResidentFlg == 1)
+                    NonResident = new NonResident(sector, offset);
+                else
+                    Resident = new Resident(sector, offset);
+            }
         }
 
         public override string ToString()
