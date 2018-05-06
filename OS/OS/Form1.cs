@@ -6,6 +6,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using NtfsLib;
@@ -24,21 +25,31 @@ namespace OS
             if (folderBrowserDialog1.ShowDialog() == DialogResult.OK)
             {
                 string fileName = folderBrowserDialog1.SelectedPath;
-                string[] catalogs = fileName.Split(new char[] { Path.DirectorySeparatorChar});
+                string[] catalogs = fileName.Split(new char[] { Path.DirectorySeparatorChar});//Разбиваем полный путь на имена каталогов
 
                 NTFS ntfs = new NTFS(catalogs[0]);
-                MFT root = ntfs.ReturnMFTRecord(5);
-                var x = FoundSubdir(root, catalogs[1]);
+
+                int nextRecord = 5;
+                MFT root;
+                for (int i = 1; i < catalogs.Length; i++)
+                {
+                    root = ntfs.ReturnMFTRecord(nextRecord);
+                    nextRecord = FoundSubdir(root, catalogs[i]);
+                }
+
+                MFT catalog = ntfs.ReturnMFTRecord(nextRecord);
             }
         }
 
-        private ulong FoundSubdir(MFT record, string dir)
+        private int FoundSubdir(MFT record, string dir)
         {
-            ulong result = 0;
+            int result = 0;
+            var fileNames = record.Indexes.Select(n => n.FileNameString).ToArray();
+
             foreach (var index in record.Indexes)
             {
                 if (index.FileNameString == dir)
-                    result = index.IndexedFile;
+                    result = (int)index.IndexedFile;
             }
 
             return result;

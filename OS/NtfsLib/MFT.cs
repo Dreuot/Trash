@@ -169,72 +169,85 @@ namespace NtfsLib
 
                 run = list.ToArray();
 
-                int offset = 0;
-                IndexAllocation ia = new IndexAllocation();
-                ia.Signature = new byte[4];
-                for (int j = 0; j < 4; j++)
-                    ia.Signature[j] = run[offset + j];
-
-                for (int j = 0; j < 2; j++)
-                    ia.UsaOffset += (ushort)(run[offset + 0x04 + j] << (j * 8));
-
-                for (int j = 0; j < 2; j++)
-                    ia.UsaCount += (ushort)(run[offset + 0x06 + j] << (j * 8));
-
-                for (int j = 0; j < 8; j++)
-                    ia.Lsn += (ulong)run[offset + 0x08 + j] << (j * 8);
-
-                for (int j = 0; j < 8; j++)
-                    ia.IndexBlockVCN += (ulong)run[offset + 0x10 + j] << (j * 8);
-
-                IndexHeader ih = new IndexHeader();
-                offset += 0x18;
-                for (int j = 0; j < 4; j++)
-                    ih.EntriesOffset += (uint)run[offset + j + 0x00] << (j * 8);
-
-                for (int j = 0; j < 4; j++)
-                    ih.IndexLength += (uint)run[offset + j + 0x04] << (j * 8);
-
-                for (int j = 0; j < 4; j++)
-                    ih.AllocatedSize += (uint)run[offset + j + 0x08] << (j * 8);
-
-                for (int j = 0; j < 4; j++)
-                    ih.Flags += (uint)run[offset + j + 0x0C] << (j * 8);
-
-                offset += (int)ih.EntriesOffset;
-
                 int count = (int)(attr.NonResident.DataSize / mft.IndexBlockSize);
-
-                IndexHeaderDir ind;
-                do
-                //for (int k = 0; k < count; k++)
+                for (int k = 0; k < count; k++)
                 {
-                    ind = new IndexHeaderDir();
-                    for (int j = 0; j < 6; j++)
-                        ind.IndexedFile += (ulong)run[(uint)offset + 0x00 + (ulong)j] << (j * 8);
+                    int offset = (int)(0 + IndexBlockSize * k);
+                    IndexAllocation ia = new IndexAllocation();
+                    ia.Signature = new byte[4];
+                    for (int j = 0; j < 4; j++)
+                        ia.Signature[j] = run[offset + j];
 
                     for (int j = 0; j < 2; j++)
-                        ind.Length += (ushort)(run[(uint)offset + 0x08 + (ulong)j] << (j * 8));
+                        ia.UsaOffset += (ushort)(run[offset + 0x04 + j] << (j * 8));
 
                     for (int j = 0; j < 2; j++)
-                        ind.KeyLength += (ushort)(run[(uint)offset + 0x0A + (ulong)j] << (j * 8));
+                        ia.UsaCount += (ushort)(run[offset + 0x06 + j] << (j * 8));
+
+                    for (int j = 0; j < 8; j++)
+                        ia.Lsn += (ulong)run[offset + 0x08 + j] << (j * 8);
+
+                    for (int j = 0; j < 8; j++)
+                        ia.IndexBlockVCN += (ulong)run[offset + 0x10 + j] << (j * 8);
+
+                    IndexHeader ih = new IndexHeader();
+                    offset += 0x18;
+                    for (int j = 0; j < 4; j++)
+                        ih.EntriesOffset += (uint)run[offset + j + 0x00] << (j * 8);
 
                     for (int j = 0; j < 4; j++)
-                        ind.Flags += run[(uint)offset + 0x0C + (ulong)j] << (j * 8);
+                        ih.IndexLength += (uint)run[offset + j + 0x04] << (j * 8);
 
-                    ind.FileName = new byte[ind.Length - 0x10];
-                    for (int j = 0; j < ind.Length - 0x10; j++)
-                        ind.FileName[j] = run[(uint)offset + 0x10 + (ulong)j];
+                    for (int j = 0; j < 4; j++)
+                        ih.AllocatedSize += (uint)run[offset + j + 0x08] << (j * 8);
 
-                    var fn = ind.FileNameString;
+                    for (int j = 0; j < 4; j++)
+                        ih.Flags += (uint)run[offset + j + 0x0C] << (j * 8);
 
-                    if (ind.Flags != 2)
-                        indexes.Add(ind);
+                    offset += (int)ih.EntriesOffset;
 
-                    offset += ind.Length;
-                }while (ind.Flags != 2);
+
+
+                    IndexHeaderDir ind;
+                    do
+                    {
+                        ind = new IndexHeaderDir();
+                        for (int j = 0; j < 6; j++)
+                            ind.IndexedFile += (ulong)run[(uint)offset + 0x00 + (ulong)j] << (j * 8);
+
+                        for (int j = 0; j < 2; j++)
+                            ind.Length += (ushort)(run[(uint)offset + 0x08 + (ulong)j] << (j * 8));
+
+                        for (int j = 0; j < 2; j++)
+                            ind.KeyLength += (ushort)(run[(uint)offset + 0x0A + (ulong)j] << (j * 8));
+
+                        for (int j = 0; j < 4; j++)
+                            ind.Flags += run[(uint)offset + 0x0C + (ulong)j] << (j * 8);
+
+                        if ((ind.Flags & 2) == 2)
+                            break;
+
+                        ind.FileName = new byte[ind.KeyLength];
+                        for (int j = 0; j < ind.KeyLength; j++)
+                            ind.FileName[j] = run[(uint)offset + 0x10 + (ulong)j];
+
+                        string fn = "";
+                        if (ind.KeyLength > 0)
+                        {
+                            int length = ind.FileName[0x40];
+                            for (int g = 0; g < length * 2; g += 2)
+                                fn += (char)(ind.FileName[0x42 + g] + (ind.FileName[0x42 + g + 1] << 8));
+                        }
+
+                        ind.FileNameString = fn;
+
+                        if (ind.Flags != 2)
+                            indexes.Add(ind);
+
+                        offset += ind.Length;
+                    } while (ind.Flags != 2);
+                }
             }
-
 
             return indexes;
         }
@@ -294,15 +307,28 @@ namespace NtfsLib
                 for (int i = 0; i < 4; i++)
                     ind.Flags += sector[current + 0x0C + (ulong)i] << (i * 8);
 
-                ind.FileName = new byte[ind.KeyLength];
-                for (int i = 0; i < ind.KeyLength; i += 2)
-                    ind.FileName[i] = (byte)(sector[current + 0x10 + (ulong)i] + (sector[current + 0x10 + (ulong)i + 1] << 8));
+                if ((ind.Flags & 2) == 2)
+                    break;
 
-                if(ind.Flags != 2)
+                ind.FileName = new byte[ind.KeyLength];
+                for (int i = 0; i < ind.KeyLength; i++)
+                    ind.FileName[i] = sector[current + 0x10 + (ulong)i];
+
+                string fn = "";
+                if (ind.KeyLength > 0)
+                {
+                    int length = ind.FileName[0x40];
+                    for (int g = 0; g < length * 2; g += 2)
+                        fn += (char)(ind.FileName[0x42 + g] + (ind.FileName[0x42 + g + 1] << 8));
+                }
+
+                ind.FileNameString = fn;
+
+                if (ind.Flags != 2)
                     indexes.Add(ind);
 
                 current += ind.Length;
-            } while (ind.Flags == 1);
+            } while (ind.Flags != 2);
 
             return indexes;
         }

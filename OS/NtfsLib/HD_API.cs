@@ -64,19 +64,20 @@ namespace NtfsLib
         public const uint OPEN_EXISTING = 0x3;
         public const uint IOCTL_DISK_GET_DRIVE_GEOMETRY = 0x70000;
 
-        public static unsafe byte[] ReturnSector(SafeFileHandle drive, int sectorNum)
+        public static unsafe byte[] ReturnSector(SafeFileHandle drive, int sectorNum) // Чтение сектора под номером sectorNum
         {
-            byte[] bytes = new byte[BPB.BYTE_IN_SECTOR]; // BOOT сектор в виде одномерного массива байтов
-            int distance;
+            byte[] bytes = new byte[BPB.BYTE_IN_SECTOR]; // сектор в виде одномерного массива байтов
             IntPtr BytesRead = IntPtr.Zero;
-            SetFilePointer(drive, sectorNum * BPB.BYTE_IN_SECTOR, out distance, EMoveMethod.Begin);
+            ulong pointer = (ulong)sectorNum * (ulong)BPB.BYTE_IN_SECTOR;
+            int hight = (int)(pointer >> 32);
+            HD_API.SetFilePointer(drive, (int)(pointer & 0xffffffff), out hight, HD_API.EMoveMethod.Begin);
 
             fixed (byte* ptr = bytes)
             {
-                ReadFile(drive, ptr, BPB.BYTE_IN_SECTOR, BytesRead, IntPtr.Zero); // Считывание первого сектора
+                HD_API.ReadFile(drive, ptr, BPB.BYTE_IN_SECTOR, BytesRead, IntPtr.Zero); // Считывание сектора
             };
 
-            SetFilePointer(drive, 0, out distance, EMoveMethod.Begin);
+            HD_API.SetFilePointer(drive, 0, out hight, HD_API.EMoveMethod.Begin);
 
             return bytes;
         }

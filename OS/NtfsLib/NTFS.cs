@@ -28,21 +28,23 @@ namespace NtfsLib
                 );
 
             BPB = new BPB(Drive);
-            MFT = ReturnMFTRecord(0);
+            MFT = GetFirstMFT();
         }
 
         private unsafe byte[] _ReadSector(int sectorNum)
         {
-            byte[] bytes = new byte[BPB.BYTE_IN_SECTOR]; // BOOT сектор в виде одномерного массива байтов
+            byte[] bytes = new byte[BPB.BYTE_IN_SECTOR]; // сектор в виде одномерного массива байтов
             IntPtr BytesRead = IntPtr.Zero;
-            HD_API.SetFilePointer(Drive, sectorNum * BPB.BYTE_IN_SECTOR, out int distance, HD_API.EMoveMethod.Begin);
+            ulong pointer = (ulong)sectorNum * (ulong)BPB.BYTE_IN_SECTOR;
+            int hight = (int)(pointer >> 32);
+            HD_API.SetFilePointer(Drive, (int)(pointer & 0xffffffff), out hight, HD_API.EMoveMethod.Begin);
 
             fixed (byte* ptr = bytes)
             {
-                HD_API.ReadFile(Drive, ptr, BPB.BYTE_IN_SECTOR, BytesRead, IntPtr.Zero); // Считывание первого сектора
+                HD_API.ReadFile(Drive, ptr, BPB.BYTE_IN_SECTOR, BytesRead, IntPtr.Zero); // Считывание сектора
             };
 
-            HD_API.SetFilePointer(Drive, 0, out distance, HD_API.EMoveMethod.Begin);
+            HD_API.SetFilePointer(Drive, 0, out hight, HD_API.EMoveMethod.Begin);
 
             return bytes;
         }
@@ -87,15 +89,61 @@ namespace NtfsLib
             return ByteRecord;
         }
 
-        public MFT ReturnMFTRecord(int indexMFT)
+        public MFT GetFirstMFT()
         {
             byte[] ByteRecord = new byte[(int)Math.Pow(2, BPB.ClustersPerMFT * -1)];
             for (int i = 0; i < ByteRecord.Length / 512; i++)
             {
-                Array.Copy(ReadSector((int)(BPB.FirstClusterMFT * BPB.SectorPerCluster) + indexMFT * 2 + i), 0, ByteRecord, i * BPB.BytePerSec, BPB.BytePerSec);
+                Array.Copy(ReadSector((int)(BPB.FirstClusterMFT * BPB.SectorPerCluster) + i), 0, ByteRecord, i * BPB.BytePerSec, BPB.BytePerSec);
             }
 
             return new MFT(ByteRecord, this);
+        }
+
+        public MFT ReturnMFTRecord(int indexMFT)
+        {
+            int mftSize = (int)Math.Pow(2, BPB.ClustersPerMFT * -1);
+            int recordInCluster = BPB.SectorPerCluster * BPB.BytePerSec / mftSize;
+            int sector = FindSector(indexMFT);
+
+            byte[] ByteRecord = new byte[mftSize];
+            for (int i = 0; i < ByteRecord.Length / 512; i++)
+            {
+                Array.Copy(ReadSector(sector + i), 0, ByteRecord, i * BPB.BytePerSec, BPB.BytePerSec);
+            }
+
+            return new MFT(ByteRecord, this);
+        }
+
+        private int FindSector(int indexMFT)
+        {
+            int mftSize = (int)Math.Pow(2, BPB.ClustersPerMFT * -1);
+            int recordInCluster = BPB.SectorPerCluster * BPB.BytePerSec / mftSize;
+            Attribute data = MFT.Attributes.Where(n => n.Type == AttributeTypes.AT_DATA).FirstOrDefault();
+            int prevMin = 0;
+            int prevMax = 0;
+            int maxRec = 0;
+            int minRec = 0;
+            int run = 0;
+            for (int i = 0; i < data.NonResident.Clusters.Count; i++)
+            {
+                minRec = prevMax;
+                maxRec = (int)(data.NonResident.Clusters[i].End - data.NonResident.Clusters[i].Start) * recordInCluster + prevMax;
+                if (indexMFT < maxRec)
+                {
+                    run = i;
+                    break;
+                }
+
+                prevMin = minRec;
+                prevMax = maxRec;
+            }
+
+            int startSectorOfCluster = (int)data.NonResident.Clusters[run].Start * BPB.SectorPerCluster;
+            int recordInRun = indexMFT - minRec;
+            int number = startSectorOfCluster + recordInRun * (mftSize / BPB.BytePerSec);
+
+            return number;
         }
     }
 }

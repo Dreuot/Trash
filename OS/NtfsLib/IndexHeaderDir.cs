@@ -18,17 +18,7 @@ namespace NtfsLib
         public int Flags { get; set; } //флаги
         /*0x10*/
         public byte[] FileName { get; set; }//сам атрибут $FILE_NAME, если key_length 
-                                     //больше нуля.
-
-        public string FileNameString
-        {
-            get
-            {
-                char[] chars = new char[FileName.Length];
-                Encoding.Unicode.GetChars(FileName, 0, chars.Length, chars, 0);
-
-                return new string(chars);
-            }
-        }
+                                            //больше нуля
+        public string FileNameString { get; set; }
     }
 }
