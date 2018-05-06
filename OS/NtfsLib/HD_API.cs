@@ -50,8 +50,13 @@ namespace NtfsLib
             byte* pBuffer,        // data buffer, should be fixed
             int NumberOfBytesToRead,  // number of bytes to read
             IntPtr pNumberOfBytesRead,  // number of bytes read, provide IntPtr.Zero here
-                                        /*NativeOverlapped**/IntPtr lpOverlapped // should be fixed, if not IntPtr.Zero
+            /*NativeOverlapped**/IntPtr lpOverlapped // should be fixed, if not IntPtr.Zero
             );
+
+        [System.Runtime.InteropServices.DllImport("kernel32", SetLastError = true)]
+        static extern unsafe bool CloseHandle(
+            System.IntPtr hObject // handle to object
+        );
 
         public const uint GENERIC_READ = 0x80000000;
         public const uint FILE_SHARE_READ = 0x00000001;

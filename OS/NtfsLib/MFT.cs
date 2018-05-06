@@ -203,7 +203,7 @@ namespace NtfsLib
 
                 offset += (int)ih.EntriesOffset;
 
-                int count = (int)(run.Length / mft.IndexBlockSize);
+                int count = (int)(attr.NonResident.DataSize / mft.IndexBlockSize);
 
                 IndexHeaderDir ind;
                 do
@@ -232,7 +232,7 @@ namespace NtfsLib
                         indexes.Add(ind);
 
                     offset += ind.Length;
-                } while (ind.Flags != 2);
+                }while (ind.Flags != 2);
             }
 
 
@@ -295,8 +295,8 @@ namespace NtfsLib
                     ind.Flags += sector[current + 0x0C + (ulong)i] << (i * 8);
 
                 ind.FileName = new byte[ind.KeyLength];
-                for (int i = 0; i < ind.KeyLength; i++)
-                    ind.FileName[i] = sector[current + 0x10 + (ulong)i];
+                for (int i = 0; i < ind.KeyLength; i += 2)
+                    ind.FileName[i] = (byte)(sector[current + 0x10 + (ulong)i] + (sector[current + 0x10 + (ulong)i + 1] << 8));
 
                 if(ind.Flags != 2)
                     indexes.Add(ind);

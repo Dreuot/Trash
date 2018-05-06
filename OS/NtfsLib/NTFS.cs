@@ -16,7 +16,6 @@ namespace NtfsLib
         public NTFS(string drive)
         {
             drive = "\\\\.\\" + drive;
-            drive = drive.Remove(drive.Length - 1, 1);
 
             Drive = HD_API.CreateFile(
                 drive,

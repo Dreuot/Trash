@@ -24,7 +24,7 @@ namespace NtfsLib
                                                          //которое было выделено под тело
                                                          //атрибута
                                                          /*0x30*/
-        public ulong DataSize; //реальный размер атрибута
+        public ulong DataSize { get; set; } //реальный размер атрибута
         /*0x38*/
         public ulong InitializedSize;
         public int StartCluster { get; set; }
