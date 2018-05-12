@@ -10,7 +10,7 @@ using System.Windows.Forms;
 
 namespace Phonebook
 {
-    public partial class AddContact : Form
+    public partial class AddContact : Form // наследование
     {
         public Contact contact;
         bool validated = false;
@@ -34,15 +34,14 @@ namespace Phonebook
                 try
                 {
                     contact.SetAddress(textBox5.Text);
+                    this.DialogResult = DialogResult.OK;
+                    this.Close();
                 }
                 catch (Exception)
                 {
                     MessageBox.Show("Адрес не распознан");
                 }
             }
-
-            this.DialogResult = DialogResult.OK;
-            this.Close();
         }
 
         private void textBox1_Validating(object sender, CancelEventArgs e)
@@ -60,7 +59,7 @@ namespace Phonebook
 
         private void textBox4_Validating(object sender, CancelEventArgs e)
         {
-            if (textBox1.Text == "")
+            if (textBox4.Text == "")
             {
                 errorProvider1.SetError((TextBox)sender, "Не заполнено поле Номер");
                 validated = false;
@@ -73,7 +72,7 @@ namespace Phonebook
 
         private void textBox2_Validating(object sender, CancelEventArgs e)
         {
-            if (textBox1.Text == "")
+            if (textBox2.Text == "")
             {
                 errorProvider1.SetError((TextBox)sender, "Не заполнено поле Имя");
                 validated = false;
@@ -86,7 +85,10 @@ namespace Phonebook
 
         private void button3_Click(object sender, EventArgs e)
         {
-
+            if (openFileDialog1.ShowDialog() == DialogResult.OK )
+            {
+                textBox6.Text = openFileDialog1.FileName;
+            }
         }
     }
 }

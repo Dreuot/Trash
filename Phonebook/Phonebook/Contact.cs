@@ -24,7 +24,7 @@ namespace Phonebook
         public string Flat { get; set; } = "";
 
         public string FullName => $"{LastName} {FirstName} {MiddleName}";
-        public string Adress => $"{Country} г.{City} ул.{Street} д.{House}" + ((Flat == null || Flat == "") ? "" : $"кв.{Flat}");
+        public string Address => $"{Country} г.{City} ул.{Street} д.{House}" + ((Flat == null || Flat == "") ? "" : $"кв.{Flat}");
 
         public Contact()
         {
@@ -41,6 +41,7 @@ namespace Phonebook
 
         public void SetAddress(string address)
         {
+            // шаблоны поисков
             const string courntyPattern = @"(?<country>^([A-Za-zА-Яа-я]+))";
             const string cityPattern = @"[Гг].(?<city>([A-Za-zА-Яа-я]+))";
             const string streetPattern = @"[Уу]{1}[Лл]{1}.(?<street>([A-Za-zА-Яа-я]+))";
