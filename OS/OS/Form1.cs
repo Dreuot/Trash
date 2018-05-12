@@ -15,6 +15,8 @@ namespace OS
 {
     public partial class Form1 : Form
     {
+        List<DisplayMFT> display = new List<DisplayMFT>();
+
         public Form1()
         {
             InitializeComponent();
@@ -53,7 +55,7 @@ namespace OS
                 }
 
                 MFT catalog = ntfs.GetMftRecord(nextRecord);
-                List<DisplayMFT> display = new List<DisplayMFT>();
+   display = new List<DisplayMFT>();
                 foreach (var index in catalog.Indexes)
                 {
                     display.Add(new DisplayMFT(ntfs.GetMftRecord((int)index.IndexedFile)));
@@ -87,6 +89,24 @@ namespace OS
                         SearchOption.AllDirectories))
                         File.Copy(newPath, newPath.Replace(source, target), true);
                 }
+            }
+        }
+
+        private void сохранитьКакToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog op = new OpenFileDialog();
+            op.CheckPathExists = false;
+            op.CheckFileExists = false;
+            if (op.ShowDialog() == DialogResult.OK)
+            {
+                StringBuilder sb = new StringBuilder();
+                foreach (var item in display)
+                {
+                    sb.Append($"{item.FileName}\t{item.MftNumber}\t{item.Clusters}");
+                    sb.Append("\n");
+                }
+
+                File.WriteAllText(op.FileName, sb.ToString());
             }
         }
     }

@@ -32,8 +32,9 @@
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.файлToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.поискToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.dataGridView1 = new System.Windows.Forms.DataGridView();
             this.копированиеКаталогаToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.dataGridView1 = new System.Windows.Forms.DataGridView();
+            this.сохранитьКакToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.SuspendLayout();
@@ -52,7 +53,8 @@
             // 
             this.файлToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.поискToolStripMenuItem,
-            this.копированиеКаталогаToolStripMenuItem});
+            this.копированиеКаталогаToolStripMenuItem,
+            this.сохранитьКакToolStripMenuItem});
             this.файлToolStripMenuItem.Name = "файлToolStripMenuItem";
             this.файлToolStripMenuItem.Size = new System.Drawing.Size(48, 20);
             this.файлToolStripMenuItem.Text = "Файл";
@@ -64,6 +66,13 @@
             this.поискToolStripMenuItem.Text = "Поиск";
             this.поискToolStripMenuItem.Click += new System.EventHandler(this.поискToolStripMenuItem_Click);
             // 
+            // копированиеКаталогаToolStripMenuItem
+            // 
+            this.копированиеКаталогаToolStripMenuItem.Name = "копированиеКаталогаToolStripMenuItem";
+            this.копированиеКаталогаToolStripMenuItem.Size = new System.Drawing.Size(199, 22);
+            this.копированиеКаталогаToolStripMenuItem.Text = "Копирование каталога";
+            this.копированиеКаталогаToolStripMenuItem.Click += new System.EventHandler(this.копированиеКаталогаToolStripMenuItem_Click);
+            // 
             // dataGridView1
             // 
             this.dataGridView1.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
@@ -74,12 +83,12 @@
             this.dataGridView1.Size = new System.Drawing.Size(616, 541);
             this.dataGridView1.TabIndex = 2;
             // 
-            // копированиеКаталогаToolStripMenuItem
+            // сохранитьКакToolStripMenuItem
             // 
-            this.копированиеКаталогаToolStripMenuItem.Name = "копированиеКаталогаToolStripMenuItem";
-            this.копированиеКаталогаToolStripMenuItem.Size = new System.Drawing.Size(199, 22);
-            this.копированиеКаталогаToolStripMenuItem.Text = "Копирование каталога";
-            this.копированиеКаталогаToolStripMenuItem.Click += new System.EventHandler(this.копированиеКаталогаToolStripMenuItem_Click);
+            this.сохранитьКакToolStripMenuItem.Name = "сохранитьКакToolStripMenuItem";
+            this.сохранитьКакToolStripMenuItem.Size = new System.Drawing.Size(199, 22);
+            this.сохранитьКакToolStripMenuItem.Text = "Сохранить как";
+            this.сохранитьКакToolStripMenuItem.Click += new System.EventHandler(this.сохранитьКакToolStripMenuItem_Click);
             // 
             // Form1
             // 
@@ -108,6 +117,7 @@
         private System.Windows.Forms.ToolStripMenuItem поискToolStripMenuItem;
         private System.Windows.Forms.DataGridView dataGridView1;
         private System.Windows.Forms.ToolStripMenuItem копированиеКаталогаToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem сохранитьКакToolStripMenuItem;
     }
 }
 
