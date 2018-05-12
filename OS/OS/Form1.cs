@@ -18,27 +18,7 @@ namespace OS
         public Form1()
         {
             InitializeComponent();
-        }
-
-        private void button1_Click(object sender, EventArgs e)
-        {
-            if (folderBrowserDialog1.ShowDialog() == DialogResult.OK)
-            {
-                string fileName = folderBrowserDialog1.SelectedPath;
-                string[] catalogs = fileName.Split(new char[] { Path.DirectorySeparatorChar});//Разбиваем полный путь на имена каталогов
-
-                NTFS ntfs = new NTFS(catalogs[0]);
-
-                int nextRecord = 5;
-                MFT root;
-                for (int i = 1; i < catalogs.Length; i++)
-                {
-                    root = ntfs.ReturnMFTRecord(nextRecord);
-                    nextRecord = FoundSubdir(root, catalogs[i]);
-                }
-
-                MFT catalog = ntfs.ReturnMFTRecord(nextRecord);
-            }
+            dataGridView1.DefaultCellStyle.WrapMode = DataGridViewTriState.True;
         }
 
         private int FoundSubdir(MFT record, string dir)
@@ -53,6 +33,61 @@ namespace OS
             }
 
             return result;
+        }
+
+        private void поискToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (folderBrowserDialog1.ShowDialog() == DialogResult.OK)
+            {
+                string fileName = folderBrowserDialog1.SelectedPath;
+                string[] catalogs = fileName.Split(new char[] { Path.DirectorySeparatorChar }, StringSplitOptions.RemoveEmptyEntries );//Разбиваем полный путь на имена каталогов
+
+                NTFS ntfs = new NTFS(catalogs[0]);
+
+                int nextRecord = 5;
+                MFT root;
+                for (int i = 1; i < catalogs.Length; i++)
+                {
+                    root = ntfs.GetMftRecord(nextRecord);
+                    nextRecord = FoundSubdir(root, catalogs[i]);
+                }
+
+                MFT catalog = ntfs.GetMftRecord(nextRecord);
+                List<DisplayMFT> display = new List<DisplayMFT>();
+                foreach (var index in catalog.Indexes)
+                {
+                    display.Add(new DisplayMFT(ntfs.GetMftRecord((int)index.IndexedFile)));
+                }
+
+                dataGridView1.DataSource = null;
+                dataGridView1.DataSource = display;
+            }
+        }
+
+        private void копированиеКаталогаToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (folderBrowserDialog1.ShowDialog() == DialogResult.OK)
+            {
+                string source = folderBrowserDialog1.SelectedPath;
+                if (folderBrowserDialog1.ShowDialog() == DialogResult.OK)
+                {
+                    string target = folderBrowserDialog1.SelectedPath;
+                    target = Path.Combine(target, Path.GetFileName(source));
+
+                    // Копируем корневую папку
+                    Directory.CreateDirectory(target);
+
+                    // Копируем структуру каталогов
+                    foreach (string dirPath in Directory.GetDirectories(source, "*",
+                        SearchOption.AllDirectories))
+                        Directory.CreateDirectory(dirPath.Replace(source, target));
+
+                    // Копируем файлы
+                    foreach (string newPath in Directory.GetFiles(source, "*.*",
+                        SearchOption.AllDirectories))
+                        File.Copy(newPath, newPath.Replace(source, target), true);
+                }
+            }
         }
     }
 }

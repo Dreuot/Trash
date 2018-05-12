@@ -100,7 +100,7 @@ namespace NtfsLib
             return new MFT(ByteRecord, this);
         }
 
-        public MFT ReturnMFTRecord(int indexMFT)
+        public MFT GetMftRecord(int indexMFT)
         {
             int mftSize = (int)Math.Pow(2, BPB.ClustersPerMFT * -1);
             int recordInCluster = BPB.SectorPerCluster * BPB.BytePerSec / mftSize;

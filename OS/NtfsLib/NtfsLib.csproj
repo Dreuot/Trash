@@ -44,6 +44,7 @@
     <Compile Include="Attribute.cs" />
     <Compile Include="AttributeTypes.cs" />
     <Compile Include="BPB.cs" />
+    <Compile Include="DisplayMFT.cs" />
     <Compile Include="HD_API.cs" />
     <Compile Include="IndexAllocation.cs" />
     <Compile Include="IndexHeader.cs" />

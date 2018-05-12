@@ -115,12 +115,12 @@ namespace NtfsLib
                     } while (RunListCurrentByte != 0);
                 }
 
-                if(Attribute.Type == AttributeTypes.AT_INDEX_ROOT)
+                if(Attribute.Type == AttributeTypes.AT_INDEX_ROOT && FileName != "$Secure")
                 {
                     Indexes.AddRange(IndexElements(sector, offset, Attribute));
                 }
 
-                if(Attribute.Type == AttributeTypes.AT_INDEX_ALLOCATION)
+                if(Attribute.Type == AttributeTypes.AT_INDEX_ALLOCATION && FileName != "$Secure")
                 {
                     Indexes.AddRange(IndexAllocationElements(this, Attribute));
                 }
@@ -151,6 +151,7 @@ namespace NtfsLib
         {
             if (attr.Type != AttributeTypes.AT_INDEX_ALLOCATION)
                 throw new ArgumentException("Incorrect type of attribute");
+
             var bpb = NTFS.BPB;
             int bytePerCluster = bpb.BytePerSec * bpb.SectorPerCluster;
 
