@@ -191,7 +191,7 @@ namespace ImageTransform
 
         private void pictureBox1_Click(object sender, EventArgs e)
         {
-            if (firstPoints.Count < 4)
+            if (firstPoints.Count < 4 && pictureBox1.Image != null)
             {
                 MouseEventArgs m = (MouseEventArgs)e;
                 Point coordinates = m.Location;
@@ -199,8 +199,11 @@ namespace ImageTransform
                 Point onImage = GetPointOnImage(image, coordinates);
                 firstPoints.Add(onImage);
 
-                image.SetPixel(onImage.X, onImage.Y, Color.Yellow);
-                pictureBox1.Image = image;
+                if (onImage.X < image.Width && onImage.X > 0 && onImage.Y > 0 && onImage.Y < image.Height)
+                {
+                    image.SetPixel(onImage.X, onImage.Y, Color.Yellow);
+                    pictureBox1.Image = image;
+                }
             }
         }
 
@@ -238,7 +241,7 @@ namespace ImageTransform
 
         private void pictureBox2_Click(object sender, EventArgs e)
         {
-            if (secondPoints.Count < 4)
+            if (secondPoints.Count < 4 && pictureBox2.Image != null)
             {
                 MouseEventArgs m = (MouseEventArgs)e;
                 Point coordinates = m.Location;
