@@ -284,7 +284,21 @@ namespace ImageTransformer
                     xy.Init(x, y);
                     var coordinate = m * xy;
                     if (coordinate[0, 0] < result.Width && coordinate[0, 0] > 0 & coordinate[1, 0] > 0 && coordinate[1, 0] < result.Height)
-                        result.SetPixel((int)coordinate[0, 0], (int)coordinate[1, 0], pixel);
+                    {
+                        int x1 = (int)Math.Ceiling(coordinate[0, 0]);
+                        int x2 = (int)Math.Floor(coordinate[0, 0]);
+                        int y1 = (int)Math.Ceiling(coordinate[1, 0]);
+                        int y2 = (int)Math.Floor(coordinate[1, 0]);
+                        //result.SetPixel((int)coordinate[0, 0], (int)coordinate[1, 0], pixel);
+                        if (x1 < result.Width && x1 > 0 && y1 < result.Height && y1 > 0)
+                            result.SetPixel(x1, y1, pixel);
+                        if (x2 < result.Width && x2 > 0 && y2 < result.Height && y2 > 0)
+                            result.SetPixel(x2, y2, pixel);
+                        if (x1 < result.Width && x1 > 0 && y2 < result.Height && y2 > 0)
+                            result.SetPixel(x1, y2, pixel);
+                        if (x2 < result.Width && x2 > 0 && y1 < result.Height && y1 > 0)
+                            result.SetPixel(x2, y1, pixel);
+                    }
                 }
             }
 

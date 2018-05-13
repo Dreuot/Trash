@@ -225,7 +225,7 @@ namespace ImageTransform
         {
             firstPoints.Clear();
             secondPoints.Clear();
-            pictureBox1.Image = first;
+            pictureBox1.Image = transformer.Image;
             pictureBox2.Image = second;
         }
 
