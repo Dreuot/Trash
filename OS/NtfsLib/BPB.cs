@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace NtfsLib
 {
+    /// <summary>
+    /// Объектное представление блока параметров БИОС
+    /// </summary>
     public class BPB
     {
         public static readonly int BYTE_IN_LINE = 16;
@@ -56,9 +59,12 @@ namespace NtfsLib
             ReadBPB();
         }
 
+        /// <summary>
+        /// Конструктор
+        /// </summary>
         private void ReadBPB()
         {
-            bootSector = LoadBootSector();
+            bootSector = LoadBootSector(); // считывание загрузочного сектора
             byte[] sector = BootSector;
             Signature = "";
             for (int i = 0; i < 8; i++)
@@ -94,6 +100,10 @@ namespace NtfsLib
                 SerialNumber += (ulong)sector[i + 0x48] << (8 * i);
         }
 
+        /// <summary>
+        /// Чтение загрузочного сектора
+        /// </summary>
+        /// <returns></returns>
         private unsafe byte[] LoadBootSector()
         {
             byte[] bytes = new byte[BYTE_IN_SECTOR]; // BOOT сектор в виде одномерного массива байтов

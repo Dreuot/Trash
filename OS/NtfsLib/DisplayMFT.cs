@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace NtfsLib
 {
+    /// <summary>
+    /// Представление записи МФТ для вывода в таблицу
+    /// </summary>
     public class DisplayMFT
     {
         private MFT mft;
@@ -43,6 +46,10 @@ namespace NtfsLib
             }
         }
 
+        /// <summary>
+        /// Конструктор
+        /// </summary>
+        /// <param name="mft">Запись МФТ для отображения</param>
         public DisplayMFT(MFT mft)
         {
             this.mft = mft;

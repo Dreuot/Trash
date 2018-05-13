@@ -9,6 +9,9 @@ using Microsoft.Win32.SafeHandles;
 
 namespace NtfsLib
 {
+    /// <summary>
+    /// WinAPI функции, необходимые для работы с жестким диском на низком уровне
+    /// </summary>
     class HD_API
     {
         [DllImport("kernel32.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.StdCall,
@@ -64,6 +67,12 @@ namespace NtfsLib
         public const uint OPEN_EXISTING = 0x3;
         public const uint IOCTL_DISK_GET_DRIVE_GEOMETRY = 0x70000;
 
+        /// <summary>
+        /// Чтение сектора 
+        /// </summary>
+        /// <param name="drive">Файл, представляющий диск</param>
+        /// <param name="sectorNum">Номер сектора</param>
+        /// <returns></returns>
         public static unsafe byte[] ReturnSector(SafeFileHandle drive, int sectorNum) // Чтение сектора под номером sectorNum
         {
             byte[] bytes = new byte[BPB.BYTE_IN_SECTOR]; // сектор в виде одномерного массива байтов

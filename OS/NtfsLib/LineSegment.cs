@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace NtfsLib
 {
+    /// <summary>
+    /// Отрезок нерезидентного аттрибута, хранит адреса начального и конечного кластеров
+    /// </summary>
     public class LineSegment
     {
         public ulong Start { get; set; }
