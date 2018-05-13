@@ -32,7 +32,7 @@ namespace ImageTransform
             if(openFileDialog1.ShowDialog() == DialogResult.OK)
             {
                 transformer = new Transformer(openFileDialog1.FileName);
-                pictureBox1.Image = transformer.Image;
+                pictureBox1.Image = first = transformer.Image.Clone() as Bitmap;
             }
         }
 
@@ -225,7 +225,7 @@ namespace ImageTransform
         {
             firstPoints.Clear();
             secondPoints.Clear();
-            pictureBox1.Image = transformer.Image;
+            pictureBox1.Image = transformer.Image.Clone() as Bitmap;
             pictureBox2.Image = second;
         }
 
