@@ -97,12 +97,12 @@ namespace ImageTransform
 
         private async void эрозияToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            pictureBox2.Image = await transformer.Erosion();
+            pictureBox2.Image = await transformer.Dilatation();
         }
 
         private async void дилекцияToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            pictureBox2.Image = await transformer.Dilation();
+            pictureBox2.Image = await transformer.Erosion();
         }
 
         private async void поворотToolStripMenuItem_Click(object sender, EventArgs e)
@@ -283,6 +283,46 @@ namespace ImageTransform
             gfxPic.Dispose();
 
             return bmpPic;
+        }
+
+        private async void верхШляпыToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var last = transformer.LastOpearationResult;
+            var errosion = await transformer.Erosion();
+
+            var open = await transformer.Dilatation();
+
+            for (int x = 0; x < errosion.Width; x++)
+            {
+                for (int y = 0; y < errosion.Height; y++)
+                {
+                    var color = last.GetPixel(x, y).R - open.GetPixel(x, y).R;
+                    color = color < 0 ? 0 : color;
+                    color = color > 255 ? 255 : color;
+                    errosion.SetPixel(x, y, Color.FromArgb(255, color, color, color));
+                }
+            }
+
+            pictureBox2.Image = errosion;
+        }
+
+        private async void низШляпыToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var last = transformer.LastOpearationResult;
+            var errosion = await transformer.Dilatation();
+            var close = await transformer.Erosion();
+            for (int x = 0; x < errosion.Width; x++)
+            {
+                for (int y = 0; y < errosion.Height; y++)
+                {
+                    var color = last.GetPixel(x, y).R - close.GetPixel(x, y).R;
+                    color = color < 0 ? 0 : color;
+                    color = color > 255 ? 255 : color;
+                    errosion.SetPixel(x, y, Color.FromArgb(255, color, color, color));
+                }
+            }
+
+            pictureBox2.Image = errosion;
         }
     }
 }

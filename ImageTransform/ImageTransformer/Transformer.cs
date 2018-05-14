@@ -350,27 +350,27 @@ namespace ImageTransformer
 
         #region Морфологические операции
 
-        public async Task<Bitmap> Erosion(Bitmap image)
+        public async Task<Bitmap> Dilatation(Bitmap image)
         {
             int[,] mask = {
                 { 0, 1, 0},
                 { 1, 1, 1},
                 { 0, 1, 0}
             };
-            return await Task.Run(() => _Erosion(image, mask, 3));
+            return await Task.Run(() => _Dilatation(image, mask, 3));
         }
 
-        public async Task<Bitmap> Erosion()
+        public async Task<Bitmap> Dilatation()
         {
             int[,] mask = {
                 { 0, 1, 0},
                 { 1, 1, 1},
                 { 0, 1, 0}
             };
-            return await Task.Run(() => _Erosion(LastOpearationResult, mask, 3));
+            return await Task.Run(() => _Dilatation(LastOpearationResult, mask, 3));
         }
 
-        private Bitmap _Erosion(Bitmap image, int[,] mask, int dim)
+        private Bitmap _Dilatation(Bitmap image, int[,] mask, int dim)
         {
             var result = _TransformToBinary(image);
             int one = 255;
@@ -412,27 +412,27 @@ namespace ImageTransformer
             return result;
         }
 
-        public async Task<Bitmap> Dilation(Bitmap image)
+        public async Task<Bitmap> Erosion(Bitmap image)
         {
             int[,] mask = {
                 { 0, 1, 0},
                 { 1, 1, 1},
                 { 0, 1, 0}
             };
-            return await Task.Run(() => _Dilation(image, mask, 3));
+            return await Task.Run(() => _Erosion(image, mask, 3));
         }
 
-        public async Task<Bitmap> Dilation()
+        public async Task<Bitmap> Erosion()
         {
             int[,] mask = {
                 { 0, 1, 0},
                 { 1, 1, 1},
                 { 0, 1, 0}
             };
-            return await Task.Run(() => _Dilation(LastOpearationResult, mask, 3));
+            return await Task.Run(() => _Erosion(LastOpearationResult, mask, 3));
         }
 
-        private Bitmap _Dilation(Bitmap image, int[,] mask, int dim)
+        private Bitmap _Erosion(Bitmap image, int[,] mask, int dim)
         {
             var result = CloneImage(image);
             int zero = 0;
