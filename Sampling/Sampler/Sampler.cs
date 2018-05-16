@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sampler
 {
@@ -30,7 +28,6 @@ namespace Sampler
                 return Data[row, key];
             }
         }
-
 
         public void LoadData(string fileName, bool withCaptions = false)
         {
