@@ -10,7 +10,7 @@ namespace Sampler
     public class Sampler
     {
         public string Separatop { get; set; }
-        SamplingData Data { get; set; }
+        public SamplingData Data { get; set; }
         public int RowCount => Data.RowCount;
         public IEnumerable<string> Captions => Data.Captions;
         public Func<string, string> ClassSelection { get; set; }
