@@ -37,6 +37,138 @@ namespace FirstLib
             }
         }
 
+        public int[] GetBarChart()
+        {
+            int[] result = new int[byte.MaxValue + 1];
+            for (int y = 0; y < image.Height; y++)
+            {
+                for (int x = 0; x < image.Width; x++)
+                {
+                    result[inner[x, y]]++;
+                }
+            }
+
+            return result;
+        }
+
+        public string GetInfo()
+        {
+            int[] barChart = GetBarChart();
+            int pixelCount = image.Width * image.Height; // количество пикселей
+
+            int levels = 0;
+            for (int i = 0; i < barChart.Length; i++)
+                levels += barChart[i] == 0 ? 0 : 1;
+
+            double all = 0;
+            for (int y = 0; y < image.Height; y++)
+                for (int x = 0; x < image.Width; x++)
+                    all += inner[x, y];
+
+            double averageBright = all / pixelCount;
+            if (averageBright <= 107)
+                averageBright = averageBright / 128;
+            else if (averageBright > 147)
+                averageBright = (255 - averageBright) / 128;
+            else
+                averageBright = 1;
+
+            double contrast = 0;
+            int max = 0;
+            int min = 0;
+            for (int i = 0; i < barChart.Length; i++)
+            {
+                if(barChart[i] != 0)
+                {
+                    min = i;
+                    break;
+                }
+            }
+
+            for (int i = barChart.Length - 1; i > 0; i--)
+            {
+                if (barChart[i] != 0)
+                {
+                    max = i;
+                    break;
+                }
+            }
+
+            contrast = (double)(max - min) / byte.MaxValue;
+
+            double infLevel = 1.0 * levels / 256;
+
+            Func<int, double> P = (i) =>
+            {
+                return (double)barChart[i] / pixelCount;
+            };
+
+            Func<double> H = () =>
+            {
+                double res = 0;
+                for (int i = 0; i < barChart.Length; i++)
+                {
+                    var p = P(i);
+                    if(p != 0)
+                        res += p * Math.Log(p, 2);
+                }
+
+                return res * -1;
+            };
+
+            double entropy = H() / 8;
+
+            double disp = 0;
+            double averageI = 0;
+            for (int i = 0; i < barChart.Length; i++)
+                averageI += i * P(i);
+
+            for (int i = 0; i < barChart.Length; i++)
+                disp += P(i) * Math.Pow(i - averageI, 2);
+
+            disp = Math.Sqrt(disp);
+            disp = disp <= 50 ? disp / 50 : (100 - disp) / 50;
+
+            double IPK = 0.33 * averageBright + 0.27 * disp + 0.2 * contrast + 0.13 * infLevel + 0.07 * entropy;
+
+            StringBuilder sb = new StringBuilder();
+            sb.Append("Количество уровней: ");
+            sb.Append(levels.ToString() + "\r\n");
+            sb.Append("Количество информативных уровней: ");
+            sb.Append(infLevel.ToString() + "\r\n");
+            sb.Append("Контраст: ");
+            sb.Append(contrast.ToString() + "\r\n");
+            sb.Append("Средняя яркость: ");
+            sb.Append(averageBright.ToString() + "\r\n");
+            sb.Append("СКО: ");
+            sb.Append(disp.ToString() + "\r\n");
+            sb.Append("Энтропия: ");
+            sb.Append(entropy.ToString() + "\r\n");
+            sb.Append("ИПК: ");
+            sb.Append(IPK.ToString() + "\r\n");
+            return sb.ToString();
+        }
+
+        public Bitmap GetImage()
+        {
+            return image;
+        }
+
+        public Task<Bitmap> ToGrayScaleAsync()
+        {
+            return Task.Run(() => ToGrayScale());
+        }
+
+        public Bitmap ToGrayScale()
+        {
+            return GrayArrayToImage(inner);
+        }
+
+        public static Task<int[,]> ImageToGrayArrayAsync(Bitmap image)
+        {
+            return Task.Run(() => ImageToGrayArray(image));
+        }
+
         public static int[,] ImageToGrayArray(Bitmap image)
         {
             int[,] result = new int[image.Width, image.Height];
@@ -50,6 +182,11 @@ namespace FirstLib
             }
 
             return result;
+        }
+
+        public static Task<int[,]> ImageToColoredArrayAsync(Bitmap image)
+        {
+            return Task.Run(() => ImageToColoredArray(image));
         }
 
         public static int[,] ImageToColoredArray(Bitmap image)
