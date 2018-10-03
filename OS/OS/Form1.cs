@@ -66,7 +66,7 @@ namespace OS
             }
         }
 
-        private void копированиеКаталогаToolStripMenuItem_Click(object sender, EventArgs e)
+        private async void копированиеКаталогаToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (folderBrowserDialog1.ShowDialog() == DialogResult.OK)
             {
@@ -76,18 +76,21 @@ namespace OS
                     string target = folderBrowserDialog1.SelectedPath; // целевой каталог
                     target = Path.Combine(target, Path.GetFileName(source));
 
-                    // Копируем корневую папку
-                    Directory.CreateDirectory(target);
+                    await Task.Run(() =>
+                    {
+                        // Копируем корневую папку 
+                        Directory.CreateDirectory(target);
 
-                    // Копируем структуру каталогов
-                    foreach (string dirPath in Directory.GetDirectories(source, "*",
+                        // Копируем структуру каталогов 
+                        foreach (string dirPath in Directory.GetDirectories(source, "*",
                         SearchOption.AllDirectories))
-                        Directory.CreateDirectory(dirPath.Replace(source, target));
+                            Directory.CreateDirectory(dirPath.Replace(source, target));
 
-                    // Копируем файлы
-                    foreach (string newPath in Directory.GetFiles(source, "*.*",
+                        // Копируем файлы 
+                        foreach (string newPath in Directory.GetFiles(source, "*.*",
                         SearchOption.AllDirectories))
-                        File.Copy(newPath, newPath.Replace(source, target), true);
+                            File.Copy(newPath, newPath.Replace(source, target), true);
+                    });
                 }
             }
         }
