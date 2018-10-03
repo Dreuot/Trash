@@ -54,82 +54,20 @@ namespace FirstLib
         public string GetInfo()
         {
             int[] barChart = GetBarChart();
-            int pixelCount = image.Width * image.Height; // количество пикселей
 
-            int levels = 0;
-            for (int i = 0; i < barChart.Length; i++)
-                levels += barChart[i] == 0 ? 0 : 1;
+            int levels = GetLevels(barChart);
 
-            double all = 0;
-            for (int y = 0; y < image.Height; y++)
-                for (int x = 0; x < image.Width; x++)
-                    all += inner[x, y];
+            double averageBright = GetAverageBright();
 
-            double averageBright = all / pixelCount;
-            if (averageBright <= 107)
-                averageBright = averageBright / 128;
-            else if (averageBright > 147)
-                averageBright = (255 - averageBright) / 128;
-            else
-                averageBright = 1;
+            double contrast = GetContrast(barChart);
 
-            double contrast = 0;
-            int max = 0;
-            int min = 0;
-            for (int i = 0; i < barChart.Length; i++)
-            {
-                if(barChart[i] != 0)
-                {
-                    min = i;
-                    break;
-                }
-            }
+            double infLevel = GetInfLevel(barChart);
 
-            for (int i = barChart.Length - 1; i > 0; i--)
-            {
-                if (barChart[i] != 0)
-                {
-                    max = i;
-                    break;
-                }
-            }
+            double entropy = GetEnthropy(barChart);
 
-            contrast = (double)(max - min) / byte.MaxValue;
+            double disp = GetDeviation(barChart);
 
-            double infLevel = 1.0 * levels / 256;
-
-            Func<int, double> P = (i) =>
-            {
-                return (double)barChart[i] / pixelCount;
-            };
-
-            Func<double> H = () =>
-            {
-                double res = 0;
-                for (int i = 0; i < barChart.Length; i++)
-                {
-                    var p = P(i);
-                    if(p != 0)
-                        res += p * Math.Log(p, 2);
-                }
-
-                return res * -1;
-            };
-
-            double entropy = H() / 8;
-
-            double disp = 0;
-            double averageI = 0;
-            for (int i = 0; i < barChart.Length; i++)
-                averageI += i * P(i);
-
-            for (int i = 0; i < barChart.Length; i++)
-                disp += P(i) * Math.Pow(i - averageI, 2);
-
-            disp = Math.Sqrt(disp);
-            disp = disp <= 50 ? disp / 50 : (100 - disp) / 50;
-
-            double IPK = 0.33 * averageBright + 0.27 * disp + 0.2 * contrast + 0.13 * infLevel + 0.07 * entropy;
+            double IPK = CalcIPK(averageBright, contrast, infLevel, entropy, disp);
 
             StringBuilder sb = new StringBuilder();
             sb.Append("Количество уровней: ");
@@ -147,6 +85,113 @@ namespace FirstLib
             sb.Append("ИПК: ");
             sb.Append(IPK.ToString() + "\r\n");
             return sb.ToString();
+        }
+
+        private static double CalcIPK(double averageBright, double contrast, double infLevel, double entropy, double disp)
+        {
+            return 0.33 * averageBright + 0.27 * disp + 0.2 * contrast + 0.13 * infLevel + 0.07 * entropy;
+        }
+
+        private double GetDeviation(int[] barChart)
+        {
+            double disp = 0;
+            double averageI = 0;
+            int pixelCount = image.Width * image.Height;
+            Func<int, double> P = (i) =>
+            {
+                return (double)barChart[i] / pixelCount;
+            };
+
+            for (int i = 0; i < barChart.Length; i++)
+                averageI += i * P(i);
+
+            for (int i = 0; i < barChart.Length; i++)
+                disp += P(i) * Math.Pow(i - averageI, 2);
+
+            disp = Math.Sqrt(disp);
+            disp = disp <= 50 ? disp / 50 : (100 - disp) / 50;
+            return disp;
+        }
+
+        private double GetInfLevel(int[] barchart)
+        {
+            return 1.0 * GetLevels(barchart) / 256;
+        }
+
+        private double GetEnthropy(int[] barChart)
+        {
+            var pixelCount = image.Width * image.Height;
+            Func<int, double> P = (i) =>
+            {
+                return (double)barChart[i] / pixelCount;
+            };
+
+            Func<double> H = () =>
+            {
+                double res = 0;
+                for (int i = 0; i < barChart.Length; i++)
+                {
+                    var p = P(i);
+                    if (p != 0)
+                        res += p * Math.Log(p, 2);
+                }
+
+                return res * -1;
+            };
+            return H() / 8;
+        }
+
+        private double GetContrast(int[] barChart)
+        {
+            double contrast = 0;
+            int max = 0;
+            int min = 0;
+            for (int i = 0; i < barChart.Length; i++)
+            {
+                if (barChart[i] != 0)
+                {
+                    min = i;
+                    break;
+                }
+            }
+
+            for (int i = barChart.Length - 1; i > 0; i--)
+            {
+                if (barChart[i] != 0)
+                {
+                    max = i;
+                    break;
+                }
+            }
+
+            contrast = (double)(max - min) / byte.MaxValue;
+            return contrast;
+        }
+
+        private double GetAverageBright()
+        {
+            int pixelCount = image.Width * image.Height; // количество пикселей
+            double all = 0;
+            for (int y = 0; y < image.Height; y++)
+                for (int x = 0; x < image.Width; x++)
+                    all += inner[x, y];
+
+            double averageBright = all / pixelCount;
+            if (averageBright <= 107)
+                averageBright = averageBright / 128;
+            else if (averageBright > 147)
+                averageBright = (255 - averageBright) / 128;
+            else
+                averageBright = 1;
+            return averageBright;
+        }
+
+        private int GetLevels(int[] barChart)
+        {
+            int levels = 0;
+            for (int i = 0; i < barChart.Length; i++)
+                levels += barChart[i] == 0 ? 0 : 1;
+            return levels;
         }
 
         public Bitmap GetImage()
