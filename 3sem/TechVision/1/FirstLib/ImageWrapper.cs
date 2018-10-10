@@ -194,14 +194,94 @@ namespace FirstLib
             return levels;
         }
 
+        private Bitmap Soebel()
+        {
+            double[,] Lx =
+            {
+                { 1, 0, -1},
+                { 2, 0, -2},
+                { 1, 0, -1}
+            };
+
+            double[,] Ly =
+            {
+                { 1, 2, 1},
+                { 0, 0, 0},
+                { -1, -2, -1}
+            };
+
+            var sX = TransformPixel(inner, Lx);
+            var sY = TransformPixel(inner, Ly);
+
+            int[,] result = new int[image.Width, image.Height];
+
+            for (int x = 0; x < image.Width; x++)
+            {
+                for (int y = 0; y < image.Height; y++)
+                {
+                    int color = (int)Math.Sqrt(Math.Pow(sX[x, y], 2) + Math.Pow(sY[x, y], 2));
+                    color = Normalize(color);
+                    result[x, y] = 255 - color;
+                }
+            }
+
+            return GrayArrayToImage(result);
+        }
+
+        private static int Normalize(int color)
+        {
+            return color > 255 ? 255 : (color < 0 ? 0 : color);
+        }
+
+        public async Task<Bitmap> SoebelAsync()
+        {
+            return await Task.Run(() => Soebel());
+        }
+
+        private bool IsBound(int x, int y, int dX, int dY)
+        {
+            return ((x + dX > 0) && (x + dX < image.Width) && (y + dY > 0) && (y + dY < image.Height));
+        }
+
+        private int[,] TransformPixel(int[,] image, double[,] mask)
+        {
+            int width = image.GetLength(0);
+            int height = image.GetLength(1);
+            int dimX = mask.GetLength(0);
+            int dimY = mask.GetLength(1);
+            int[,] result = new int[width, height];
+            for (int x = 0; x < width; x++)
+            {
+                int color = 0;
+                for (int y = 0; y < height; y++)
+                {
+                    color = 0;
+                    for (int i = 0; i < dimX; i++)
+                    {
+                        for (int j = 0; j < dimY; j++)
+                        {
+                            int maskX = (dimX / 2) + i;
+                            int maskY = (dimY / 2) + j;
+                            if (IsBound(x, y, maskX, maskY))
+                               color += (int)(image[x + maskX, y + maskY] * mask[i, j]);
+                        }
+                    }
+
+                    result[x, y] = Normalize(color);
+                }
+            }
+
+            return result;
+        }
+
         public Bitmap GetImage()
         {
             return image;
         }
 
-        public Task<Bitmap> ToGrayScaleAsync()
+        public async Task<Bitmap> ToGrayScaleAsync()
         {
-            return Task.Run(() => ToGrayScale());
+            return await Task.Run(() => ToGrayScale());
         }
 
         public Bitmap ToGrayScale()
@@ -209,9 +289,9 @@ namespace FirstLib
             return GrayArrayToImage(inner);
         }
 
-        public static Task<int[,]> ImageToGrayArrayAsync(Bitmap image)
+        public static async Task<int[,]> ImageToGrayArrayAsync(Bitmap image)
         {
-            return Task.Run(() => ImageToGrayArray(image));
+            return await Task.Run(() => ImageToGrayArray(image));
         }
 
         public static int[,] ImageToGrayArray(Bitmap image)
@@ -229,9 +309,9 @@ namespace FirstLib
             return result;
         }
 
-        public static Task<int[,]> ImageToColoredArrayAsync(Bitmap image)
+        public static async Task<int[,]> ImageToColoredArrayAsync(Bitmap image)
         {
-            return Task.Run(() => ImageToColoredArray(image));
+            return await Task.Run(() => ImageToColoredArray(image));
         }
 
         public static int[,] ImageToColoredArray(Bitmap image)

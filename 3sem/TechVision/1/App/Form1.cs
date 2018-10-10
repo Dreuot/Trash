@@ -55,7 +55,7 @@ namespace App
             {
                 var ofd = new OpenFileDialog();
                 ofd.CheckFileExists = true;
-                ofd.Filter = "(*.BMP, *.JPG, *.JPEG)|*.bmp;*.jpg;*.jpeg";
+                ofd.Filter = "(*.PNG*, .BMP, *.JPG, *.JPEG)|*.png;*.bmp;*.jpg;*.jpeg";
                 if (ofd.ShowDialog() == DialogResult.OK)
                 {
                     Image = (Bitmap)Bitmap.FromFile(ofd.FileName);
@@ -110,6 +110,11 @@ namespace App
             Console.Clear();
             Console.DrawChart("Гистограмма", Wrapper.GetBarChart());
             Console.ShowMessage(Wrapper.GetInfo());
+        }
+
+        private async void собельToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Image = await Wrapper.SoebelAsync();
         }
     }
 }
