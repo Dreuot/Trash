@@ -17,23 +17,55 @@ namespace FirstLib
         private Bitmap image;
         private int[,] inner;
         private int[,] colored;
+        private int[,] integral;
+
+        private int[,] Inner
+        {
+            get
+            {
+                if (inner == null)
+                    inner = ImageToGrayArray(image);
+
+                return inner;
+            }
+        }
+
+        private int[,] Colored
+        {
+            get
+            {
+                if (colored == null)
+                    colored = ImageToColoredArray(image);
+
+                return colored;
+            }
+        }
+
+        private int[,] Integral
+        {
+            get
+            {
+                if (integral == null)
+                    integral = GetIntegral(Inner);
+
+                return integral;
+            }
+        }
 
         public ImageWrapper(Bitmap image)
         {
             this.image = image;
-            inner = ImageToGrayArray(image);
-            colored = ImageToColoredArray(image);
         }
 
         int this[int x, int y]
         {
             get
             {
-                return inner[x, y];
+                return Inner[x, y];
             }
             set
             {
-                inner[x, y] = value;
+                Inner[x, y] = value;
             }
         }
 
@@ -44,7 +76,7 @@ namespace FirstLib
             {
                 for (int x = 0; x < image.Width; x++)
                 {
-                    result[inner[x, y]]++;
+                    result[Inner[x, y]]++;
                 }
             }
 
@@ -90,6 +122,36 @@ namespace FirstLib
         private static double CalcIPK(double averageBright, double contrast, double infLevel, double entropy, double disp)
         {
             return 0.33 * averageBright + 0.27 * disp + 0.2 * contrast + 0.13 * infLevel + 0.07 * entropy;
+        }
+
+        public async static Task<int[,]> GetIntegralAsync(int[,] image)
+        {
+            return await Task.Run(() => GetIntegral(image));
+        }
+
+        public static int[,] GetIntegral(int[,] image)
+        {
+            int width = image.GetLength(0);
+            int height = image.GetLength(1);
+            int[,] result = new int[width, height];
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    int sum = 0;
+                    for (int _y = 0; _y < y; _y++)
+                    {
+                        for (int _x = 0; _x < x; _x++)
+                        {
+                            sum += image[_x, _y];
+                        }
+                    }
+
+                    result[x, y] = sum;
+                }
+            }
+
+            return result;
         }
 
         private double GetDeviation(int[] barChart)
@@ -174,7 +236,7 @@ namespace FirstLib
             double all = 0;
             for (int y = 0; y < image.Height; y++)
                 for (int x = 0; x < image.Width; x++)
-                    all += inner[x, y];
+                    all += Inner[x, y];
 
             double averageBright = all / pixelCount;
             if (averageBright <= 107)
@@ -210,8 +272,8 @@ namespace FirstLib
                 { -1, -2, -1}
             };
 
-            var sX = TransformPixel(inner, Lx);
-            var sY = TransformPixel(inner, Ly);
+            var sX = TransformPixel(Inner, Lx);
+            var sY = TransformPixel(Inner, Ly);
 
             int[,] result = new int[image.Width, image.Height];
 
@@ -286,7 +348,7 @@ namespace FirstLib
 
         public Bitmap ToGrayScale()
         {
-            return GrayArrayToImage(inner);
+            return GrayArrayToImage(Inner);
         }
 
         public static async Task<int[,]> ImageToGrayArrayAsync(Bitmap image)
