@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OS", "OS\OS.csproj", "{2AD2
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NtfsLib", "NtfsLib\NtfsLib.csproj", "{84EE5A0F-6D74-42B3-8D59-E7055184CB0C}"
 EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "OsSetup", "OsSetup\OsSetup.vdproj", "{15A44317-3D5A-4766-82C6-CD69947FB256}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,8 @@ Global
 		{84EE5A0F-6D74-42B3-8D59-E7055184CB0C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{84EE5A0F-6D74-42B3-8D59-E7055184CB0C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{84EE5A0F-6D74-42B3-8D59-E7055184CB0C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{15A44317-3D5A-4766-82C6-CD69947FB256}.Debug|Any CPU.ActiveCfg = Debug
+		{15A44317-3D5A-4766-82C6-CD69947FB256}.Release|Any CPU.ActiveCfg = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
