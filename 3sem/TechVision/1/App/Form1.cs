@@ -28,6 +28,8 @@ namespace App
             }
         }
 
+        private int d_size;
+
         private ImageWrapper Wrapper;
 
         private ConsoleForm console = null;
@@ -97,7 +99,7 @@ namespace App
 
         private void сбросToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            Image = Wrapper.GetImage();
+            ResetImage();
         }
 
         private void гистограммаToolStripMenuItem_Click(object sender, EventArgs e)
@@ -115,6 +117,64 @@ namespace App
         private async void собельToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Image = await Wrapper.SoebelAsync();
+        }
+
+        private void pictureBox1_Click(object sender, EventArgs e)
+        {
+            MouseEventArgs ev = e as MouseEventArgs;
+            double x = ev.X;
+            double y = ev.Y;
+
+            double x_stretch = 1.0 * Wrapper.Width / pictureBox1.Width;
+            double y_stretch = 1.0 * Wrapper.Height / pictureBox1.Height;
+
+            x *= x_stretch;
+            y *= y_stretch;
+            x = Math.Truncate(x);
+            y = Math.Truncate(y);
+
+            var disp = Wrapper.GetDispersion((int)x, (int)y, d_size, d_size);
+            Console.Clear();
+            Console.ShowMessage($"Значение дисперсии равно: {disp}");
+
+            ResetImage();
+            var g = Graphics.FromImage(pictureBox1.Image);
+            g.DrawRectangle(new Pen(Color.Red), (int)x, (int)y, d_size, d_size);
+        }
+
+        private void ResetImage()
+        {
+            Image = (Bitmap)Wrapper.GetImage().Clone();
+        }
+
+        private void x15ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            d_size = 15;
+            MessageBox.Show("Выберите область");
+        }
+
+        private void x31ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            d_size = 31;
+            MessageBox.Show("Выберите область");
+        }
+
+        private void x40ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            d_size = 40;
+            MessageBox.Show("Выберите область");
+        }
+
+        private async void дисторсияToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var result = await Wrapper.DistorsionAsync(-0.00000476);
+            Image = ImageWrapper.GrayArrayToImage(result);
+        }
+
+        private async void контрастированиеToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var result = await Wrapper.ContrastAsync();
+            Image = result;
         }
     }
 }

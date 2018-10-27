@@ -19,6 +19,12 @@ namespace FirstLib
         private int[,] colored;
         private int[,] integral;
 
+        public int Width => Inner.GetLength(0);
+        public int Height => Inner.GetLength(1);
+
+        public int DispX { get; set; }
+        public int DispY { get; set; }
+
         private int[,] Inner
         {
             get
@@ -134,26 +140,23 @@ namespace FirstLib
             int width = image.GetLength(0);
             int height = image.GetLength(1);
             int[,] result = new int[width, height];
+
+            Func<int, bool> CheckX = x => !(x < 0 || x >= width);
+            Func<int, bool> CheckY = y => !(y < 0 || y >= height);
+            Func<int, int, int> GetInteg = (x, y) => CheckX(x) && CheckY(y) ? result[x, y] : 0;
+            
             for (int y = 0; y < height; y++)
             {
                 for (int x = 0; x < width; x++)
                 {
-                    int sum = 0;
-                    for (int _y = 0; _y < y; _y++)
-                    {
-                        for (int _x = 0; _x < x; _x++)
-                        {
-                            sum += image[_x, _y];
-                        }
-                    }
-
-                    result[x, y] = sum;
+                    result[x, y] = image[x, y] - GetInteg(x - 1, y - 1)
+                        + GetInteg(x, y - 1) + GetInteg(x - 1, y);
                 }
             }
 
             return result;
         }
-
+         
         private double GetDeviation(int[] barChart)
         {
             double disp = 0;
@@ -405,6 +408,147 @@ namespace FirstLib
             }
 
             return image;
+        }
+
+        int[,] sqrInner;
+        public int[,] SqrInner
+        {
+            get
+            {
+                if (sqrInner == null)
+                    sqrInner = CreateGraySqr();
+
+                return sqrInner;
+            }
+        }
+
+        int[,] sqrIntegral;
+        public int[,] SqrIntegral
+        {
+            get
+            {
+                if (sqrIntegral == null)
+                    sqrIntegral = GetIntegral(SqrInner);
+
+                return sqrIntegral;
+            }
+        }
+
+        private int[,] CreateGraySqr()
+        {
+            int[,] result = new int[Width, Height];
+            for (int _y = 0; _y < Height; _y++)
+            {
+                for (int _x = 0; _x < Width; _x++)
+                {
+                    result[_x, _y] = Inner[_x, _y] * Inner[_x, _y];
+                }
+            }
+
+            return result;
+        }
+
+        public double GetDispersion(int x, int y, int width, int height)
+        {
+            int max_x = x + width >= Width ? Width : x + width - 1;
+            int max_y = y + height >= Height ? Height - 1: y + height;
+
+            int area = (max_x - x) * (max_y - y);
+
+            double sumSqrOfRect = SqrIntegral[x, y] + SqrIntegral[max_x, max_y]
+                - SqrIntegral[x, max_y] - SqrIntegral[max_x, y];
+            double sumOfRect = Integral[x, y] + Integral[max_x, max_y]
+                - Integral[x, max_y] - Integral[max_x, y];
+
+            double sqare = sumOfRect * sumOfRect;
+
+            return (sumSqrOfRect - sqare);
+        }
+
+        private int Center_x => Width / 2;
+        private int Center_y => Height / 2;
+
+        private int ConvertX(int x)
+        {
+            return x - Center_x;
+        }
+
+        private int ConvertY(int y)
+        {
+            return y - Center_y;
+        }
+
+        private double Radius(int x, int y)
+        {
+            return Math.Sqrt(x * x + y * y);
+        }
+
+        public async Task<int[,]> DistorsionAsync(double d)
+        {
+            return await Task.Run(() => Distorsion(d));
+        }
+
+        public int[,] Distorsion(double d)
+        {
+            int[,] result = new int[Width, Height];
+            for (int y = 0; y < Height; y++)
+            {
+                for (int x = 0; x < Width; x++)
+                {
+                    result[x, y] = 0;
+                    int r_x = ConvertX(x);
+                    int r_y = ConvertY(y);
+                    double radius = Radius(r_x, r_y);
+                    double cos = r == 0 ? 1 : r_x / radius;
+                    double sin = r == 0 ? 0 : r_x / radius;
+
+                    double distorsedR = radius * (1 + d * radius * radius);
+
+                    int d_x = (int)(distorsedR * cos + r_x);
+                    int d_y = (int)(distorsedR * sin + r_y);
+                    if(!(d_x < 0 || d_x >= Width || d_y < 0 || d_y >= Height))
+                        result[d_x + Center_x, d_y + Center_y] = Inner[x, y];
+                }
+            }
+
+            return result;
+        }
+
+        public async Task<Bitmap> ContrastAsync()
+        {
+            return await Task.Run(() => Contrast());
+        }
+
+        public Bitmap Contrast()
+        {
+            int[,] result = new int[Width, Height];
+            var barChart = GetBarChart();
+            int L = 0;
+            int R = 0;
+            for (int i = 0; i < barChart.Length; i++)
+            {
+                if (barChart[i] > 0)
+                {
+                    L = i;
+                    break;
+                }
+            }
+
+            for (int i = barChart.Length - 1; i >= 0; i--)
+            {
+                if (barChart[i] > 0)
+                {
+                    R = i;
+                    break;
+                }
+            }
+
+            double d = byte.MaxValue / (R - L);
+            for (int y = 0; y < Height; y++)
+                for (int x = 0; x < Width; x++)
+                    result[x, y] = (int)((Inner[x, y] - L) * d);
+
+            return GrayArrayToImage(result);
         }
     }
 }
