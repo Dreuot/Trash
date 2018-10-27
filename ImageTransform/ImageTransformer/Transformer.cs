@@ -273,6 +273,10 @@ namespace ImageTransformer
         private Bitmap _Stretch(Bitmap image, double x_mult, double y_mult)
         {
             var result = new Bitmap((int)(Width * x_mult), (int)(Height * y_mult));
+            Graphics g = Graphics.FromImage(result);
+            Color back = Color.FromArgb(255, 0, 202, 54);
+            g.Clear(back);
+
             Matrix m = new Matrix(2, 2);
             m.Init(x_mult, 0, 0, y_mult);
             for (int x = 0; x < Width; x++)
@@ -298,6 +302,17 @@ namespace ImageTransformer
                             result.SetPixel(x1, y2, pixel);
                         if (x2 < result.Width && x2 > 0 && y1 < result.Height && y1 > 0)
                             result.SetPixel(x2, y1, pixel);
+                    }
+                }
+            }
+
+            for (int x = 0; x < result.Width; x++)
+            {
+                for (int y = 0; y < result.Height; y++)
+                {
+                    if(result.GetPixel(x, y) == back)
+                    {
+                        
                     }
                 }
             }
