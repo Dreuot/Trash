@@ -210,9 +210,13 @@ namespace App
             MessageBox.Show("Выберите область");
         }
 
-        private void комплексированиеToolStripMenuItem_Click(object sender, EventArgs e)
+        private async void комплексированиеToolStripMenuItem_Click(object sender, EventArgs e)
         {
-
+            string tv = Interaction.InputBox("Введите путь до изображения с ТВ камеры", "Путь к файлу", @"C:\Users\Андрей\Pictures\TV.bmp");
+            string ir = Interaction.InputBox("Введите путь до изображения с ТПВ камеры", "Путь к файлу", @"C:\Users\Андрей\Pictures\TPV.bmp");
+            Bitmap _tv = (Bitmap)Bitmap.FromFile(tv);
+            Bitmap _ir = (Bitmap)Bitmap.FromFile(ir);
+            Image = await Wrapper.ComplexAsync(_tv, _ir);
         }
     }
 }

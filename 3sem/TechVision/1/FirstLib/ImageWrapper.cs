@@ -731,5 +731,41 @@ namespace FirstLib
             return await RGBToImageAsync(await YiqToRgbAsync(yiq));
         }
         #endregion
+
+        #region Комплексирование
+        public async Task<Bitmap> ComplexAsync(Bitmap teleImg, Bitmap teploImg)
+        {
+            return await Task.Run(() => Complex(teleImg, teploImg));
+        }
+
+        public Bitmap Complex(Bitmap teleImg, Bitmap teploImg)
+        {
+            var TV = ImageToGrayArray(teleImg);
+            var IR = ImageToGrayArray(teploImg);
+
+            int l = teleImg.Width;
+            int h = teleImg.Height;
+            double _IR = 0;
+            for (int y = 0; y < h; y++)
+                for (int x = 0; x < l; x++)
+                    _IR += IR[x, y];
+
+            _IR /= l * h;
+            double _dIR = 0;
+            for (int y = 0; y < h; y++)
+                for (int x = 0; x < l; x++)
+                    _dIR += IR[x, y] - _IR;
+
+            _dIR /= l * h;
+
+            int[,] result = new int[l, h];
+            for (int y = 0; y < h; y++)
+                for (int x = 0; x < l; x++)
+                    result[x, y] = Normalize((int)(TV[x, y] + Math.Abs(IR[x, y] - _IR) - _dIR));
+
+            return GrayArrayToImage(result);
+        }
+
+        #endregion
     }
 }
