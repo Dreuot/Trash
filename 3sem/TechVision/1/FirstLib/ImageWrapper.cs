@@ -9,14 +9,9 @@ namespace FirstLib
 {
     public class ImageWrapper
     {
-        const int colorCount = 3; // RGB
-        const int r = 0;
-        const int g = 1;
-        const int b = 2;
-
         private Bitmap image;
         private int[,] inner;
-        private int[,] colored;
+        private RGB[,] colored;
         private int[,] integral;
 
         public int Width => Inner.GetLength(0);
@@ -25,7 +20,7 @@ namespace FirstLib
         public int DispX { get; set; }
         public int DispY { get; set; }
 
-        private int[,] Inner
+        public int[,] Inner
         {
             get
             {
@@ -36,12 +31,12 @@ namespace FirstLib
             }
         }
 
-        private int[,] Colored
+        public RGB[,] Colored
         {
             get
             {
                 if (colored == null)
-                    colored = ImageToColoredArray(image);
+                    colored = ImageToRGB(image);
 
                 return colored;
             }
@@ -75,14 +70,54 @@ namespace FirstLib
             }
         }
 
+        public async static Task<int[,]> GetIntegralAsync(int[,] image)
+        {
+            return await Task.Run(() => GetIntegral(image));
+        }
+
+        public static int[,] GetIntegral(int[,] image)
+        {
+            int width = image.GetLength(0);
+            int height = image.GetLength(1);
+            int[,] result = new int[width, height];
+
+            Func<int, bool> CheckX = x => !(x < 0 || x >= width);
+            Func<int, bool> CheckY = y => !(y < 0 || y >= height);
+            Func<int, int, int> GetInteg = (x, y) => CheckX(x) && CheckY(y) ? result[x, y] : 0;
+
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    result[x, y] = image[x, y] - GetInteg(x - 1, y - 1)
+                        + GetInteg(x, y - 1) + GetInteg(x - 1, y);
+                }
+            }
+
+            return result;
+        }
+
+        public Bitmap GetImage()
+        {
+            return image;
+        }
+
+        #region Информация об изображении
         public int[] GetBarChart()
         {
+            return GetBarChart(Inner);
+        }
+
+        public int[] GetBarChart(int[,] image)
+        {
+            int width = image.GetLength(0);
+            int height = image.GetLength(1);
             int[] result = new int[byte.MaxValue + 1];
-            for (int y = 0; y < image.Height; y++)
+            for (int y = 0; y < height; y++)
             {
-                for (int x = 0; x < image.Width; x++)
+                for (int x = 0; x < width; x++)
                 {
-                    result[Inner[x, y]]++;
+                    result[image[x, y]]++;
                 }
             }
 
@@ -91,7 +126,7 @@ namespace FirstLib
 
         public string GetInfo()
         {
-            int[] barChart = GetBarChart();
+            int[] barChart = GetBarChart(Inner);
 
             int levels = GetLevels(barChart);
 
@@ -130,33 +165,6 @@ namespace FirstLib
             return 0.33 * averageBright + 0.27 * disp + 0.2 * contrast + 0.13 * infLevel + 0.07 * entropy;
         }
 
-        public async static Task<int[,]> GetIntegralAsync(int[,] image)
-        {
-            return await Task.Run(() => GetIntegral(image));
-        }
-
-        public static int[,] GetIntegral(int[,] image)
-        {
-            int width = image.GetLength(0);
-            int height = image.GetLength(1);
-            int[,] result = new int[width, height];
-
-            Func<int, bool> CheckX = x => !(x < 0 || x >= width);
-            Func<int, bool> CheckY = y => !(y < 0 || y >= height);
-            Func<int, int, int> GetInteg = (x, y) => CheckX(x) && CheckY(y) ? result[x, y] : 0;
-            
-            for (int y = 0; y < height; y++)
-            {
-                for (int x = 0; x < width; x++)
-                {
-                    result[x, y] = image[x, y] - GetInteg(x - 1, y - 1)
-                        + GetInteg(x, y - 1) + GetInteg(x - 1, y);
-                }
-            }
-
-            return result;
-        }
-         
         private double GetDeviation(int[] barChart)
         {
             double disp = 0;
@@ -258,7 +266,9 @@ namespace FirstLib
                 levels += barChart[i] == 0 ? 0 : 1;
             return levels;
         }
+        #endregion
 
+        #region Собель
         private Bitmap Soebel()
         {
             double[,] Lx =
@@ -328,7 +338,7 @@ namespace FirstLib
                             int maskX = (dimX / 2) + i;
                             int maskY = (dimY / 2) + j;
                             if (IsBound(x, y, maskX, maskY))
-                               color += (int)(image[x + maskX, y + maskY] * mask[i, j]);
+                                color += (int)(image[x + maskX, y + maskY] * mask[i, j]);
                         }
                     }
 
@@ -338,12 +348,9 @@ namespace FirstLib
 
             return result;
         }
+        #endregion
 
-        public Bitmap GetImage()
-        {
-            return image;
-        }
-
+        #region Преобразование в разные форматы
         public async Task<Bitmap> ToGrayScaleAsync()
         {
             return await Task.Run(() => ToGrayScale());
@@ -374,22 +381,112 @@ namespace FirstLib
             return result;
         }
 
-        public static async Task<int[,]> ImageToColoredArrayAsync(Bitmap image)
+        public static async Task<RGB[,]> ImageToRGBAsync(Bitmap image)
         {
-            return await Task.Run(() => ImageToColoredArray(image));
+            return await Task.Run(() => ImageToRGB(image));
         }
 
-        public static int[,] ImageToColoredArray(Bitmap image)
+        public static RGB[,] ImageToRGB(Bitmap image)
         {
-            int[,] result = new int[image.Width * colorCount, image.Height];
-            for (int i = 0; i < image.Width; i++)
+            RGB[,] result = new RGB[image.Width, image.Height];
+            for (int y = 0; y < image.Height; y++)
             {
-                for (int j = 0; j < image.Height; j++)
+                for (int x = 0; x < image.Width; x++)
                 {
-                    var pixel = image.GetPixel(i, j);
-                    result[i + r, j] = pixel.R;
-                    result[i + g, j] = pixel.G;
-                    result[i + b, j] = pixel.B;
+                    var pixel = image.GetPixel(x, y);
+                    result[x, y] = new RGB(pixel.R, pixel.G, pixel.B);
+                }
+            }
+
+            return result;
+        }
+
+        public async Task<YIQ[,]> RgbToYiqAsync(RGB[,] image)
+        {
+            return await Task.Run(() => RgbToYiq(image));
+        }
+
+        public YIQ[,] RgbToYiq(RGB[,] image)
+        {
+            int width = image.GetLength(0);
+            int height = image.GetLength(1);
+            YIQ[,] result = new YIQ[width, height];
+            Matrix m = new Matrix(3, 3);
+            m.Init(0.299, 0.587, 0.114, 0.596, -0.274, -0.321, 0.211, -0.526, 0.311);
+            Matrix rbg = new Matrix(3, 1);
+
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    rbg.Init(image[x, y].R, image[x, y].G, image[x, y].B);
+                    Matrix yic = m * rbg;
+                    result[x, y] = new YIQ(yic[0, 0], yic[1, 0], yic[2, 0]);
+                }
+            }
+
+            return result;
+        }
+
+        public async Task<RGB[,]> YiqToRgbAsync(YIQ[,] image)
+        {
+            return await Task.Run(() => YiqToRgb(image));
+        }
+
+        public RGB[,] YiqToRgb(YIQ[,] image)
+        {
+            int width = image.GetLength(0);
+            int height = image.GetLength(1);
+            RGB[,] result = new RGB[width, height];
+            Matrix m = new Matrix(3, 3);
+            m.Init(1, 0.956, 0.623, 1, -0.272, -0.648, 1, -1.105, 1.705);
+            Matrix yic = new Matrix(3, 1);
+
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    yic.Init(image[x, y].Y, image[x, y].Ic, image[x, y].Qc);
+                    Matrix rbg = m * yic;
+                    result[x, y] = new RGB(Normalize((int)rbg[0, 0]), Normalize((int)rbg[1, 0]), Normalize((int)rbg[2, 0]));
+                }
+            }
+
+            return result;
+        }
+
+        public async Task<int[,]> YiqToGrayAsync(YIQ[,] image)
+        {
+            return await Task.Run(() => YiqToGray(image));
+        }
+
+        public int[,] YiqToGray(YIQ[,] image)
+        {
+            int width = image.GetLength(0);
+            int height = image.GetLength(1);
+            int[,] result = new int[width, height];
+            for (int y = 0; y < height; y++)
+                for (int x = 0; x < width; x++)
+                    result[x, y] = Normalize((int)image[x, y].Y);
+
+            return result;
+        }
+
+        public static async Task<Bitmap> RGBToImageAsync(RGB[,] image)
+        {
+            return await Task.Run(() => RGBToImage(image));
+        }
+
+        public static Bitmap RGBToImage(RGB[,] image)
+        {
+            int width = image.GetLength(0);
+            int height = image.GetLength(1);
+            Bitmap result = new Bitmap(width, height);
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    result.SetPixel(x, y, Color.FromArgb(image[x, y].R, image[x, y].G, image[x, y].B));
                 }
             }
 
@@ -409,7 +506,9 @@ namespace FirstLib
 
             return image;
         }
+        #endregion
 
+        #region Дисперсия в окне
         int[,] sqrInner;
         public int[,] SqrInner
         {
@@ -460,83 +559,100 @@ namespace FirstLib
             double sumOfRect = Integral[x, y] + Integral[max_x, max_y]
                 - Integral[x, max_y] - Integral[max_x, y];
 
-            double sqare = sumOfRect * sumOfRect;
+            int elements = (max_x - x) * (max_y - y);
+            sumOfRect = sumOfRect / elements;
 
-            return (sumSqrOfRect - sqare);
+            return (sumSqrOfRect / elements - sumOfRect * sumOfRect);
         }
+        #endregion
 
-        private int Center_x => Width / 2;
-        private int Center_y => Height / 2;
-
-        private int ConvertX(int x)
-        {
-            return x - Center_x;
-        }
-
-        private int ConvertY(int y)
-        {
-            return y - Center_y;
-        }
-
+        #region Дисторсия
         private double Radius(int x, int y)
         {
             return Math.Sqrt(x * x + y * y);
         }
 
-        public async Task<int[,]> DistorsionAsync(double d)
+        public async Task<Bitmap> DistorsionAsync(double L)
         {
-            return await Task.Run(() => Distorsion(d));
+            return await Task.Run(() => Distorsion(L));
         }
 
-        public int[,] Distorsion(double d)
+        public Bitmap Distorsion(double L)
         {
             int[,] result = new int[Width, Height];
+            double diagonal = Math.Sqrt(Width * Width + Height * Height) / 2;
             for (int y = 0; y < Height; y++)
             {
                 for (int x = 0; x < Width; x++)
                 {
                     result[x, y] = 0;
-                    int r_x = ConvertX(x);
-                    int r_y = ConvertY(y);
-                    double radius = Radius(r_x, r_y);
-                    double cos = r == 0 ? 1 : r_x / radius;
-                    double sin = r == 0 ? 0 : r_x / radius;
+                    int u = x - Width / 2;
+                    int v = y - Height / 2;
+                    int r = (int)Math.Sqrt(u * u + v * v);
+                    double g = Math.Cos(r * Math.PI * L / (2 * diagonal));
 
-                    double distorsedR = radius * (1 + d * radius * radius);
+                    int xi = (int)(u * g + Width / 2);
+                    int yi = (int)(v * g + Height / 2);
+                    // double radius = Radius(u, v);
+                    //double cos = Math.Cos(radius * Math.PI * L / (2 * h))
+                    //double cos = radius == 0 ? 1 : (u / radius);
+                    //double sin = radius == 0 ? 0 : (y / radius);
+                    //double distorsed = radius * (1 + L * radius * radius);
 
-                    int d_x = (int)(distorsedR * cos + r_x);
-                    int d_y = (int)(distorsedR * sin + r_y);
-                    if(!(d_x < 0 || d_x >= Width || d_y < 0 || d_y >= Height))
-                        result[d_x + Center_x, d_y + Center_y] = Inner[x, y];
+                    //int xi = Normalize((int)(distorsed * cos + Width / 2));
+                    //int yj = Normalize((int)(distorsed * sin + Height / 2));
+                    result[x, y] = Inner[xi, yi];
                 }
             }
 
-            return result;
+            return GrayArrayToImage(result);
         }
+        #endregion
 
-        public async Task<Bitmap> ContrastAsync()
+        #region Контрастирование
+        public async Task<Bitmap> LinearContrastAsync()
         {
-            return await Task.Run(() => Contrast());
+            return await Task.Run(() => LinearContrast());
         }
 
-        public Bitmap Contrast()
+        public async Task<int[,]> LinearContrastAsync(int[,] image)
+        {
+            return await Task.Run(() => _LinearContrast(image));
+        }
+
+        public Bitmap LinearContrast()
+        {
+            return LinearContrast(Inner);
+        }
+
+        public Bitmap LinearContrast(int[,] image)
+        {
+            return GrayArrayToImage(_LinearContrast(image));
+        }
+
+        private int[,] _LinearContrast(int[,] image)
         {
             int[,] result = new int[Width, Height];
-            var barChart = GetBarChart();
+            var barChart = GetBarChart(image);
+            double fivePercent = Width * Height * 0.05;
             int L = 0;
             int R = 0;
+            int sum = 0;
             for (int i = 0; i < barChart.Length; i++)
             {
-                if (barChart[i] > 0)
+                sum += barChart[i];
+                if (sum > fivePercent)
                 {
                     L = i;
                     break;
                 }
             }
 
+            sum = 0;
             for (int i = barChart.Length - 1; i >= 0; i--)
             {
-                if (barChart[i] > 0)
+                sum += barChart[i];
+                if (sum > fivePercent)
                 {
                     R = i;
                     break;
@@ -546,9 +662,74 @@ namespace FirstLib
             double d = byte.MaxValue / (R - L);
             for (int y = 0; y < Height; y++)
                 for (int x = 0; x < Width; x++)
-                    result[x, y] = (int)((Inner[x, y] - L) * d);
+                    result[x, y] = Normalize((int)((image[x, y] - L) * d));
 
-            return GrayArrayToImage(result);
+            return result;
         }
+
+        public async Task<Bitmap> EqualizContrastAsync()
+        {
+            return await Task.Run(() => EqualizContrast());
+        }
+
+        public async Task<int[,]> EqualizContrastAsync(int[,] image)
+        {
+            return await Task.Run(() => _EqualizContrast(image));
+        }
+
+        public Bitmap EqualizContrast()
+        {
+            return GrayArrayToImage(_EqualizContrast(Inner));
+        }
+
+        public int[,] _EqualizContrast(int[,] image)
+        {
+            int width = image.GetLength(0);
+            int height = image.GetLength(1);
+            int[,] result = new int[width, height];
+
+            int[] barChart = GetBarChart(image);
+            double[] p = new double[256];
+            for (int i = 0; i < 256; i++)
+                p[i] = (double)barChart[i] / (width * height);
+
+            for (int i = 1; i < 256; i++)
+                p[i] = p[i - 1] + p[i];
+
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    result[x, y] = Normalize((int)(255 * p[image[x, y]]));
+                }
+            }
+
+            return result;
+        }
+
+        public async Task<Bitmap> LinearContrastYIQ()
+        {
+            var yiq = await RgbToYiqAsync(Colored);
+            var gray = await YiqToGrayAsync(yiq);
+            var contrasted = await LinearContrastAsync(gray);
+            for (int y = 0; y < Height; y++)
+                for (int x = 0; x < Width; x++)
+                    yiq[x, y].Y = contrasted[x, y];
+
+            return await RGBToImageAsync(await YiqToRgbAsync(yiq));
+        }
+
+        public async Task<Bitmap> EqualizContrastYIQ()
+        {
+            var yiq = await RgbToYiqAsync(Colored);
+            var gray = await YiqToGrayAsync(yiq);
+            var contrasted = await EqualizContrastAsync(gray);
+            for (int y = 0; y < Height; y++)
+                for (int x = 0; x < Width; x++)
+                    yiq[x, y].Y = contrasted[x, y];
+
+            return await RGBToImageAsync(await YiqToRgbAsync(yiq));
+        }
+        #endregion
     }
 }

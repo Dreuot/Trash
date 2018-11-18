@@ -6,6 +6,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.VisualBasic;
 using System.Windows.Forms;
 
 using FirstLib;
@@ -76,6 +77,7 @@ namespace App
             try
             {
                 var sfd = new SaveFileDialog();
+                sfd.Filter = "(*.PNG*, .BMP, *.JPG, *.JPEG)|*.png;*.bmp;*.jpg;*.jpeg";
                 if (sfd.ShowDialog() == DialogResult.OK)
                 {
                     Image.Save(sfd.FileName);
@@ -147,34 +149,70 @@ namespace App
             Image = (Bitmap)Wrapper.GetImage().Clone();
         }
 
-        private void x15ToolStripMenuItem_Click(object sender, EventArgs e)
+        private async void дисторсияToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                double L = double.Parse(Interaction.InputBox("Введите коэффициент дисторсии", "Коэффициент дисторсии", "0,3"));
+                var result = await Wrapper.DistorsionAsync(L);
+                Image = result;
+            }
+            catch(Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+
+        private void графикиToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Console.DrawChart("Гистограмма", Wrapper.GetBarChart());
+        }
+
+        private async void линейноеToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var result = await Wrapper.LinearContrastAsync();
+            Image = result;
+        }
+
+        private async void эквализацияToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            var result = await Wrapper.EqualizContrastAsync();
+            Image = result;
+        }
+
+        private async void линейноеToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            var image = await Wrapper.LinearContrastYIQ();
+            Image = image;
+        }
+
+        private async void эквализацияToolStripMenuItem2_Click(object sender, EventArgs e)
+        {
+            var image = await Wrapper.EqualizContrastYIQ();
+            Image = image;
+        }
+
+        private void toolStripMenuItem2_Click(object sender, EventArgs e)
         {
             d_size = 15;
             MessageBox.Show("Выберите область");
         }
 
-        private void x31ToolStripMenuItem_Click(object sender, EventArgs e)
+        private void toolStripMenuItem3_Click(object sender, EventArgs e)
         {
             d_size = 31;
             MessageBox.Show("Выберите область");
         }
 
-        private void x40ToolStripMenuItem_Click(object sender, EventArgs e)
+        private void toolStripMenuItem4_Click(object sender, EventArgs e)
         {
             d_size = 40;
             MessageBox.Show("Выберите область");
         }
 
-        private async void дисторсияToolStripMenuItem_Click(object sender, EventArgs e)
+        private void комплексированиеToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var result = await Wrapper.DistorsionAsync(-0.00000476);
-            Image = ImageWrapper.GrayArrayToImage(result);
-        }
 
-        private async void контрастированиеToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            var result = await Wrapper.ContrastAsync();
-            Image = result;
         }
     }
 }
