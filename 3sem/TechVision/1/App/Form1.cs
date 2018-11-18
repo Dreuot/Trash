@@ -138,6 +138,7 @@ namespace App
             var disp = Wrapper.GetDispersion((int)x, (int)y, d_size, d_size);
             Console.Clear();
             Console.ShowMessage($"Значение дисперсии равно: {disp}");
+            Console.ShowMessage($"Значение среднеквадратичного отклонения равно: {Math.Sqrt(disp)}");
 
             ResetImage();
             var g = Graphics.FromImage(pictureBox1.Image);
@@ -217,6 +218,13 @@ namespace App
             Bitmap _tv = (Bitmap)Bitmap.FromFile(tv);
             Bitmap _ir = (Bitmap)Bitmap.FromFile(ir);
             Image = await Wrapper.ComplexAsync(_tv, _ir);
+        }
+
+        private async void кластеризацияToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            int count = int.Parse(Interaction.InputBox("Введите число кластеров", "Число кластеров", "5"));
+            int iteration = int.Parse(Interaction.InputBox("Введите число прогонов", "Число прогонов", "5"));
+            Image = await Wrapper.ClusterAsync(count, iteration);
         }
     }
 }

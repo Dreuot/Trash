@@ -767,5 +767,114 @@ namespace FirstLib
         }
 
         #endregion
+
+        #region Кластеризация
+        public async Task<Bitmap> ClusterAsync(int count, int iteration)
+        {
+            return await Task.Run(() => Cluster(count, iteration));
+        }
+
+        public Bitmap Cluster(int count, int iteration)
+        {
+            int pixelsCount = Width * Height;
+            Cluster[] cluster = new Cluster[pixelsCount];
+            int[] centers = new int[count];
+            int step = 255 / count;
+            int current = step / 2;
+            for (int i = 0; i < count; i++, current += step)
+                centers[i] = current;
+
+            Func<int, int, int> Distance = (x, y) =>
+            {
+                return Math.Abs(y - x);
+            };
+
+            Func<int, int> Assign = (bright) => {
+                int min = 255;
+                int num = 0;
+                for (int i = 0; i < count; i++)
+                {
+                    var distance = Distance(bright, centers[i]);
+                    if(distance < min)
+                    {
+                        min = distance;
+                        num = i;
+                    }
+                }
+
+                return num;
+            };
+
+            // Привязка точек начальным кластерам
+            for (int y = 0; y < Height; y++)
+            {
+                for (int x = 0; x < Width; x++)
+                {
+                    int num = Assign(Inner[x, y]);
+                    cluster[y * Width + x] = new FirstLib.Cluster(x, y, num);
+                }
+            }
+
+            for (int j = 0; j < iteration; j++)
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    var currentCluster = cluster.Where(c => c.Num == i).ToList();
+                    int sum = 0;
+                    foreach (var item in currentCluster)
+                        sum += Inner[item.X, item.Y];
+
+                    int average = 0;
+                    if (currentCluster.Count() != 0)
+                        average = sum / currentCluster.Count();
+                    centers[i] = average;
+                }
+
+                for (int i = 0; i < pixelsCount; i++)
+                {
+                    cluster[i].Num = Assign(Inner[cluster[i].X, cluster[i].Y]);
+                }
+            }
+
+            //Color[] colors = new Color[]
+            //{
+            //    Color.FromArgb(63,187,102),
+            //    Color.FromArgb(111,204,141),
+            //    Color.FromArgb(160,222,179),
+            //    Color.FromArgb(207,238,217),
+            //    Color.FromArgb(236,249,240),
+            //    Color.FromArgb(54,159,87),
+            //    Color.FromArgb(47,140,77),
+            //    Color.FromArgb(32,94,51),
+            //    Color.FromArgb(16,47,26),
+            //    Color.FromArgb( 6,19,10)
+            //};
+
+            Color[] colors = new Color[]
+            {
+                Color.FromArgb(0,154,176),
+                Color.FromArgb(207,188,166),
+                Color.FromArgb(0,0,1),
+                Color.FromArgb(130,239,238),
+                Color.FromArgb(18,138,8),
+                Color.FromArgb(77,0,1),
+                Color.FromArgb(162,4,23),
+                Color.FromArgb(237,66,85),
+                Color.FromArgb(0,113,68),
+                Color.FromArgb(0,64,25)
+            };
+
+            Bitmap result = (Bitmap)this.image.Clone();
+            for (int y = 0; y < Height; y++)
+            {
+                for (int x = 0; x < Width; x++)
+                {
+                    result.SetPixel(x, y, colors[cluster[y * Width + x].Num]);
+                }
+            }
+
+            return result;
+        }
+        #endregion
     }
 }
