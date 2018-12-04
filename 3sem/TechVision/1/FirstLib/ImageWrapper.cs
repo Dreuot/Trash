@@ -876,5 +876,26 @@ namespace FirstLib
             return result;
         }
         #endregion
+
+        #region Размытие
+        //public Task<Bitmap> BlurAsync(double sigma)
+        //{
+        //    return Task.Run(() => Blur(sigma));
+        //}
+
+        //public Bitmap Blur(double sigma)
+        //{
+        //    GausCoeff coef = new GausCoeff(sigma);
+        //    for (int i = 0; i < Height; i++)
+        //    {
+
+        //    }
+
+        //    for (int i = 0; i < Width; i++)
+        //    {
+
+        //    }
+        //}
+        #endregion
     }
 }
