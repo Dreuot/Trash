@@ -331,5 +331,31 @@ namespace App
                 MessageBox.Show(ex.Message);
             }
         }
+
+        private async void цветноеToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                double gamma = double.Parse(Interaction.InputBox("Введите значение 'гамма'", "Гамма", "5,5"));
+                Image = await Wrapper.ColoredBlurAsync(gamma);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+        }
+
+        private async void сероеToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                double gamma = double.Parse(Interaction.InputBox("Введите значение 'гамма'", "Гамма", "5,5"));
+                Image = await Wrapper.BlurAsync(gamma);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+        }
     }
 }

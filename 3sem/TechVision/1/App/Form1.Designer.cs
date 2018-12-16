@@ -40,6 +40,7 @@
             this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem3 = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem4 = new System.Windows.Forms.ToolStripMenuItem();
+            this.кластеризацияToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.графикиToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.контрастированиеToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.grayToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -52,7 +53,9 @@
             this.дисторсияToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.комплексированиеToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
-            this.кластеризацияToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.сглаживаниеToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.сероеToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.цветноеToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
@@ -104,7 +107,8 @@
             this.вГрадацияхСерогоToolStripMenuItem,
             this.собельToolStripMenuItem,
             this.toolStripMenuItem1,
-            this.кластеризацияToolStripMenuItem});
+            this.кластеризацияToolStripMenuItem,
+            this.сглаживаниеToolStripMenuItem});
             this.правкаToolStripMenuItem.Name = "правкаToolStripMenuItem";
             this.правкаToolStripMenuItem.Size = new System.Drawing.Size(112, 20);
             this.правкаToolStripMenuItem.Text = "Преобразования";
@@ -161,6 +165,13 @@
             this.toolStripMenuItem4.Text = "40 x 40";
             this.toolStripMenuItem4.Click += new System.EventHandler(this.toolStripMenuItem4_Click);
             // 
+            // кластеризацияToolStripMenuItem
+            // 
+            this.кластеризацияToolStripMenuItem.Name = "кластеризацияToolStripMenuItem";
+            this.кластеризацияToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.кластеризацияToolStripMenuItem.Text = "Кластеризация";
+            this.кластеризацияToolStripMenuItem.Click += new System.EventHandler(this.кластеризацияToolStripMenuItem_Click);
+            // 
             // графикиToolStripMenuItem
             // 
             this.графикиToolStripMenuItem.Name = "графикиToolStripMenuItem";
@@ -183,7 +194,7 @@
             this.линейноеToolStripMenuItem,
             this.эквализацияToolStripMenuItem1});
             this.grayToolStripMenuItem.Name = "grayToolStripMenuItem";
-            this.grayToolStripMenuItem.Size = new System.Drawing.Size(98, 22);
+            this.grayToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.grayToolStripMenuItem.Text = "Gray";
             // 
             // линейноеToolStripMenuItem
@@ -206,7 +217,7 @@
             this.линейноеToolStripMenuItem1,
             this.эквализацияToolStripMenuItem2});
             this.yIQToolStripMenuItem1.Name = "yIQToolStripMenuItem1";
-            this.yIQToolStripMenuItem1.Size = new System.Drawing.Size(98, 22);
+            this.yIQToolStripMenuItem1.Size = new System.Drawing.Size(152, 22);
             this.yIQToolStripMenuItem1.Text = "YIQ";
             // 
             // линейноеToolStripMenuItem1
@@ -255,12 +266,28 @@
             this.pictureBox1.TabStop = false;
             this.pictureBox1.Click += new System.EventHandler(this.pictureBox1_Click);
             // 
-            // кластеризацияToolStripMenuItem
+            // сглаживаниеToolStripMenuItem
             // 
-            this.кластеризацияToolStripMenuItem.Name = "кластеризацияToolStripMenuItem";
-            this.кластеризацияToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.кластеризацияToolStripMenuItem.Text = "Кластеризация";
-            this.кластеризацияToolStripMenuItem.Click += new System.EventHandler(this.кластеризацияToolStripMenuItem_Click);
+            this.сглаживаниеToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.сероеToolStripMenuItem,
+            this.цветноеToolStripMenuItem});
+            this.сглаживаниеToolStripMenuItem.Name = "сглаживаниеToolStripMenuItem";
+            this.сглаживаниеToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.сглаживаниеToolStripMenuItem.Text = "Сглаживание";
+            // 
+            // сероеToolStripMenuItem
+            // 
+            this.сероеToolStripMenuItem.Name = "сероеToolStripMenuItem";
+            this.сероеToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.сероеToolStripMenuItem.Text = "Серое";
+            this.сероеToolStripMenuItem.Click += new System.EventHandler(this.сероеToolStripMenuItem_Click);
+            // 
+            // цветноеToolStripMenuItem
+            // 
+            this.цветноеToolStripMenuItem.Name = "цветноеToolStripMenuItem";
+            this.цветноеToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.цветноеToolStripMenuItem.Text = "Цветное";
+            this.цветноеToolStripMenuItem.Click += new System.EventHandler(this.цветноеToolStripMenuItem_Click);
             // 
             // Form1
             // 
@@ -308,6 +335,9 @@
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem3;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem4;
         private System.Windows.Forms.ToolStripMenuItem кластеризацияToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem сглаживаниеToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem сероеToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem цветноеToolStripMenuItem;
     }
 }
 

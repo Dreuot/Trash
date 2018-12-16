@@ -13,6 +13,7 @@ namespace FirstLib
         private int[,] inner;
         private RGB[,] colored;
         private int[,] integral;
+        private YIQ[,] yiq;
 
         public int Width => Inner.GetLength(0);
         public int Height => Inner.GetLength(1);
@@ -39,6 +40,17 @@ namespace FirstLib
                     colored = ImageToRGB(image);
 
                 return colored;
+            }
+        }
+
+        public YIQ[,] YIQ
+        {
+            get
+            {
+                if (yiq == null)
+                    yiq = RgbToYiq(Colored);
+
+                return yiq;
             }
         }
 
@@ -878,24 +890,143 @@ namespace FirstLib
         #endregion
 
         #region Размытие
-        //public Task<Bitmap> BlurAsync(double sigma)
-        //{
-        //    return Task.Run(() => Blur(sigma));
-        //}
+        public async Task<Bitmap> BlurAsync(double sigma)
+        {
+            var result = await Task.Run(() => Blur(sigma, Inner));
+            return GrayArrayToImage(result);
+        }
 
-        //public Bitmap Blur(double sigma)
-        //{
-        //    GausCoeff coef = new GausCoeff(sigma);
-        //    for (int i = 0; i < Height; i++)
-        //    {
+        public async Task<Bitmap> ColoredBlurAsync(double sigma)
+        {
+            var yiq = await RgbToYiqAsync(this.Colored);
+            var gray = await YiqToGrayAsync(yiq);
+            gray = await Task.Run(() => Blur(sigma, gray));
+            for (int y = 0; y < Height; y++)
+                for (int x = 0; x < Width; x++)
+                    yiq[x, y].Y = gray[x, y];
 
-        //    }
+            return await RGBToImageAsync(await YiqToRgbAsync(yiq));
+        }
 
-        //    for (int i = 0; i < Width; i++)
-        //    {
+        public Bitmap Blur(double sigma)
+        {
+            return GrayArrayToImage(Blur(sigma, inner));
+        }
 
-        //    }
-        //}
+        private int[,] Blur(double sigma, int[,] inner)
+        {
+            double[,] gauss = new double[3, 3];
+            double sigmaSqr = sigma * sigma;
+            double sum = 0;
+            int[,] result = new int[Width, Height];
+
+            for (int y = -1; y <= 1; y++)
+            {
+                for (int x = -1; x <= 1; x++)
+                {
+                    gauss[x + 1, y + 1] = 1 / (2 * Math.PI * sigmaSqr) * Math.Pow(Math.E, -(Math.Pow(x, 2) + Math.Pow(y, 2)) / (2 * sigmaSqr));
+                    sum += gauss[x + 1, y + 1];
+                }
+            }
+
+            double coef = 1.0 / sum;
+
+            for (int y = 0; y < 3; y++)
+            {
+                for (int x = 0; x < 3; x++)
+                {
+                    gauss[x, y] *= coef;
+                }
+            }
+
+            for (int y = 0; y < Height; y++)
+            {
+                for (int x = 0; x < Width; x++)
+                {
+                    double val = 0;
+                    for (int _y = -1; _y <= 1; _y++)
+                    {
+                        for (int _x = -1; _x <= 1; _x++)
+                        {
+                            if ((x + _x) >= 0 && (x + _x) < Width && (y + _y) >= 0 && (y + _y) < Height)
+                            {
+                                val += inner[x + _x, y + _y] * gauss[_x + 1, _y + 1];
+                            }
+                        }
+                    }
+
+                    result[x, y] = (int)Math.Round(val);
+                }
+            }
+
+            return result;
+        }
+        #endregion
+
+        #region Автофокус
+        public async Task<double> FocusAsync(Bitmap image, int x, int y)
+        {
+            return await Task.Run(() => _Focus(image, x, y));
+        }
+
+        public double Focus(Bitmap image, int x, int y)
+        {
+            return _Focus(image, x, y);
+        }
+
+        private double _Focus(Bitmap image, int x, int y)
+        {
+            var Width = image.Width;
+            var Height = image.Height;
+            int[,] lx = { { 0,  0,  0 },
+                          { -1, 2, -1 },
+                          { 0,  0,  0 } };
+            int[,] ly = { { 0, -1, 0 },
+                          { 0,  2, 0 },
+                          { 0, -1, 0 } };
+
+            int[,] lx1 = { { 0,  0, 1 },
+                           { 0, -2, 0 },
+                           { 1,  0, 0 } };
+            int[,] lx2 = { { 1,  0, 0 },
+                           { 0, -2, 0 },
+                           { 0,  0, 1 } };
+
+            double result = 0;
+
+            double i_lx = 0;
+            double i_ly = 0;
+            double i_lx1 = 0;
+            double i_lx2 = 0;
+
+            double[,] inner = new double[3, 3];
+            for (int _y = -1; _y <= 1; _y++)
+            {
+                for (int _x = -1; _x <= 1; _x++)
+                {
+                    if ((x + _x) >= 0 && (x + _x) < Width && (y + _y) >= 0 && (y + _y) < Height)
+                        inner[_x + 1, _y + 1] = image.GetPixel(x + _x, y + _y).R * 0.3 + image.GetPixel(x + _x, y + _y).G * 0.59 + image.GetPixel(x + _x, y + _y).B * 0.11;
+                }
+            }
+
+            for (int _y = -1; _y <= 1; _y++)
+            {
+                for (int _x = -1; _x <= 1; _x++)
+                {
+                    if ((x + _x) >= 0 && (x + _x) < Width && (y + _y) >= 0 && (y + _y) < Height)
+                    {
+                        i_lx += inner[x + _x, y + _y] * lx[_x + 1, _y + 1];
+                        i_ly += inner[x + _x, y + _y] * ly[_x + 1, _y + 1];
+                        i_lx1 += inner[x + _x, y + _y] * lx1[_x + 1, _y + 1];
+                        i_lx2 += inner[x + _x, y + _y] * lx2[_x + 1, _y + 1];
+                    }
+                }
+            }
+
+            result = Math.Abs(i_lx) + Math.Abs(i_ly) + 1 / Math.Sqrt(2) * Math.Abs(i_lx1) + 1 / Math.Sqrt(2) * Math.Abs(i_lx2);
+
+            return result;
+        }
         #endregion
     }
 }
