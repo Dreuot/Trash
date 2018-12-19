@@ -8,8 +8,10 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.VisualBasic;
 using System.Windows.Forms;
+using System.IO;
 
 using FirstLib;
+using System.Text.RegularExpressions;
 
 namespace App
 {
@@ -163,6 +165,9 @@ namespace App
             }
         }
 
+        private int x_lastClick = 0;
+        private int y_lastClick = 0;
+
         private void pictureBox1_Click(object sender, EventArgs e)
         {
             try
@@ -177,7 +182,9 @@ namespace App
                 x *= x_stretch;
                 y *= y_stretch;
                 x = Math.Truncate(x);
+                x_lastClick = (int)x;
                 y = Math.Truncate(y);
+                y_lastClick = (int)y;
 
                 var disp = Wrapper.GetDispersion((int)x, (int)y, d_size, d_size);
                 Console.Clear();
@@ -351,6 +358,64 @@ namespace App
             {
                 double gamma = double.Parse(Interaction.InputBox("Введите значение 'гамма'", "Гамма", "5,5"));
                 Image = await Wrapper.BlurAsync(gamma);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+        }
+
+        private void автофокусToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                string path = Interaction.InputBox("Введите путь к каталогу с изображениями", "Путь к каталогу", @"C:\Users\Андрей\Desktop\DiamondB24");
+                List<Bitmap> images = new List<Bitmap>();
+                DirectoryInfo dir = new DirectoryInfo(path);
+                var files = dir.GetFiles();
+                var fileNames = files.Select(item => int.Parse(item.Name.Replace(".bmp", ""))).ToArray();
+                Array.Sort(fileNames);
+
+                for (int i = 0; i < fileNames.Length; i++)
+                {
+                    images.Add((Bitmap)Bitmap.FromFile(Path.Combine(path, fileNames[i].ToString()) + ".bmp"));
+                }
+
+                List<int> values = new List<int>();
+                for (int i = 0; i < images.Count; i++)
+                {
+                    values.Add((int)Wrapper.Focus(images[i], x_lastClick, y_lastClick));
+                }
+
+                var result = values.ToArray();
+                Console.DrawChart("Фокус", result);
+                ResetImage();
+                var g = Graphics.FromImage(pictureBox1.Image);
+                g.DrawRectangle(new Pen(Color.Red), x_lastClick - 10, y_lastClick - 10, 20, 20);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+        }
+
+        private async void боксСерыйToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                Image = await Wrapper.BoxBlurAsync();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+        }
+
+        private async void боксЦветнойToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                Image = await Wrapper.BoxColoredBlurAsync();
             }
             catch (Exception ex)
             {

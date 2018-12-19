@@ -961,6 +961,57 @@ namespace FirstLib
 
             return result;
         }
+
+        public async Task<Bitmap> BoxBlurAsync()
+        {
+            var result = await Task.Run(() => BoxBlur(Inner));
+            return GrayArrayToImage(result);
+        }
+
+        public async Task<Bitmap> BoxColoredBlurAsync()
+        {
+            var yiq = await RgbToYiqAsync(this.Colored);
+            var gray = await YiqToGrayAsync(yiq);
+            gray = await Task.Run(() => BoxBlur(gray));
+            for (int y = 0; y < Height; y++)
+                for (int x = 0; x < Width; x++)
+                    yiq[x, y].Y = gray[x, y];
+
+            return await RGBToImageAsync(await YiqToRgbAsync(yiq));
+        }
+
+        public Bitmap BoxBlur()
+        {
+            return GrayArrayToImage(BoxBlur(inner));
+        }
+
+        private int[,] BoxBlur(int[,] inner)
+        {
+            double[,] matrix = { { 1.0 / 9, 1.0 / 9, 1.0 / 9 }, { 1.0 / 9, 1.0 / 9, 1.0 / 9 }, { 1.0 / 9, 1.0 / 9, 1.0 / 9 } };
+            int[,] result = new int[Width, Height];
+
+            for (int y = 0; y < Height; y++)
+            {
+                for (int x = 0; x < Width; x++)
+                {
+                    double val = 0;
+                    for (int _y = -1; _y <= 1; _y++)
+                    {
+                        for (int _x = -1; _x <= 1; _x++)
+                        {
+                            if ((x + _x) >= 0 && (x + _x) < Width && (y + _y) >= 0 && (y + _y) < Height)
+                            {
+                                val += inner[x + _x, y + _y] * matrix[_x + 1, _y + 1];
+                            }
+                        }
+                    }
+
+                    result[x, y] = (int)Math.Round(val);
+                }
+            }
+
+            return result;
+        }
         #endregion
 
         #region Автофокус
@@ -1013,17 +1064,14 @@ namespace FirstLib
             {
                 for (int _x = -1; _x <= 1; _x++)
                 {
-                    if ((x + _x) >= 0 && (x + _x) < Width && (y + _y) >= 0 && (y + _y) < Height)
-                    {
-                        i_lx += inner[x + _x, y + _y] * lx[_x + 1, _y + 1];
-                        i_ly += inner[x + _x, y + _y] * ly[_x + 1, _y + 1];
-                        i_lx1 += inner[x + _x, y + _y] * lx1[_x + 1, _y + 1];
-                        i_lx2 += inner[x + _x, y + _y] * lx2[_x + 1, _y + 1];
-                    }
+                    i_lx += inner[1 + _x, 1 + _y] * lx[_x + 1, _y + 1];
+                    i_ly += inner[1 + _x, 1 + _y] * ly[_x + 1, _y + 1];
+                    i_lx1 += inner[1 + _x, 1 + _y] * 1 / Math.Sqrt(2) * lx1[_x + 1, _y + 1];
+                    i_lx2 += inner[1 + _x, 1 + _y] * 1 / Math.Sqrt(2) * lx2[_x + 1, _y + 1];
                 }
             }
 
-            result = Math.Abs(i_lx) + Math.Abs(i_ly) + 1 / Math.Sqrt(2) * Math.Abs(i_lx1) + 1 / Math.Sqrt(2) * Math.Abs(i_lx2);
+            result = Math.Abs(i_lx) + Math.Abs(i_ly) +  Math.Abs(i_lx1) + Math.Abs(i_lx2);
 
             return result;
         }
