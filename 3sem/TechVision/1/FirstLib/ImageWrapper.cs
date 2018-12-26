@@ -605,14 +605,6 @@ namespace FirstLib
 
                     int xi = (int)(u * g + Width / 2);
                     int yi = (int)(v * g + Height / 2);
-                    // double radius = Radius(u, v);
-                    //double cos = Math.Cos(radius * Math.PI * L / (2 * h))
-                    //double cos = radius == 0 ? 1 : (u / radius);
-                    //double sin = radius == 0 ? 0 : (y / radius);
-                    //double distorsed = radius * (1 + L * radius * radius);
-
-                    //int xi = Normalize((int)(distorsed * cos + Width / 2));
-                    //int yj = Normalize((int)(distorsed * sin + Height / 2));
                     result[x, y] = Inner[xi, yi];
                 }
             }
