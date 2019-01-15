@@ -94,6 +94,10 @@
       <Project>{8a87e2de-d98f-40a2-a5a2-60a982c37f30}</Project>
       <Name>FirstLib</Name>
     </ProjectReference>
+    <ProjectReference Include="..\ImageProcessing\ImageProcessing.csproj">
+      <Project>{ee082437-e7da-4989-9876-4e2175b02db1}</Project>
+      <Name>ImageProcessing</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

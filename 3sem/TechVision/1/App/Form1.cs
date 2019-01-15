@@ -12,6 +12,7 @@ using System.IO;
 
 using FirstLib;
 using System.Text.RegularExpressions;
+using ImageProcessing;
 
 namespace App
 {
@@ -33,7 +34,8 @@ namespace App
 
         private int d_size;
 
-        private ImageWrapper Wrapper;
+        private FirstLib.ImageWrapper Wrapper;
+        private ImageProcessing.ImageWrapper ImageWrapper;
 
         private ConsoleForm console = null;
         ConsoleForm Console
@@ -64,7 +66,8 @@ namespace App
                 if (ofd.ShowDialog() == DialogResult.OK)
                 {
                     Image = (Bitmap)Bitmap.FromFile(ofd.FileName);
-                    Wrapper = new ImageWrapper(Image);
+                    Wrapper = new FirstLib.ImageWrapper(Image);
+                    ImageWrapper = new ImageProcessing.ImageWrapper(Image);
                 }
             }
             catch (Exception ex)
@@ -416,6 +419,99 @@ namespace App
             try
             {
                 Image = await Wrapper.BoxColoredBlurAsync();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+        }
+
+        private async void дисторсияToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                double L = double.Parse(Interaction.InputBox("Введите коэффициент дисторсии", "Коэффициент дисторсии", "0,3"));
+                var result = await ImageWrapper.DistorsionAsync(L);
+                Image = result;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+
+        private async void контрастированиеToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                var image = await ImageWrapper.EqualizContrastAsync();
+                Image = image;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+
+        private async void сглаживаниеToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                double gamma = double.Parse(Interaction.InputBox("Введите значение 'гамма'", "Гамма", "5,5"));
+                Image = await ImageWrapper.BlurAsync(gamma);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+        }
+
+        private async void фокусToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                string path = Interaction.InputBox("Введите путь к каталогу с изображениями", "Путь к каталогу", @"C:\Users\Андрей\Desktop\DiamondB24");
+                await Task.Run(() =>
+                {
+                    List<Bitmap> images = new List<Bitmap>();
+                    DirectoryInfo dir = new DirectoryInfo(path);
+                    var files = dir.GetFiles();
+                    var fileNames = files.Select(item => int.Parse(item.Name.Replace(".bmp", ""))).ToArray();
+                    Array.Sort(fileNames);
+
+                    for (int i = 0; i < fileNames.Length; i++)
+                    {
+                        images.Add((Bitmap)Bitmap.FromFile(Path.Combine(path, fileNames[i].ToString()) + ".bmp"));
+                    }
+
+                    int Width = images[0].Width;
+                    int Height = images[0].Height;
+
+                    Bitmap result = new Bitmap(Width, Height);
+                    List<double[,]> gray = new List<double[,]>();
+                    foreach (var image in images)
+                    {
+                        gray.Add(RgbImage.FromBitmap(image).ToGrayScale());
+                    }
+
+
+                    for (int y = 0; y < Height; y++)
+                    {
+                        for (int x = 0; x < Width; x++)
+                        {
+                            List<double> values = new List<double>();
+                            for (int i = 0; i < gray.Count; i++)
+                            {
+                                values.Add(ImageProcessing.ImageWrapper.Focus(gray[i], x, y));
+                            }
+
+                            int max = values.IndexOf(values.Max());
+                            result.SetPixel(x, y, images[max].GetPixel(x, y));
+                        }
+                    }
+
+                    Image = result;
+                });
             }
             catch (Exception ex)
             {
