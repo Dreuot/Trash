@@ -58,12 +58,12 @@
             this.дисторсияToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.комплексированиеToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.автофокусToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.тестируемНовуюЛибуToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.дисторсияToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.контрастированиеToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.сглаживаниеToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.фокусToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
@@ -311,17 +311,6 @@
             this.автофокусToolStripMenuItem.Text = "Автофокус";
             this.автофокусToolStripMenuItem.Click += new System.EventHandler(this.автофокусToolStripMenuItem_Click);
             // 
-            // pictureBox1
-            // 
-            this.pictureBox1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.pictureBox1.Location = new System.Drawing.Point(0, 24);
-            this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(1075, 665);
-            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
-            this.pictureBox1.TabIndex = 1;
-            this.pictureBox1.TabStop = false;
-            this.pictureBox1.Click += new System.EventHandler(this.pictureBox1_Click);
-            // 
             // тестируемНовуюЛибуToolStripMenuItem
             // 
             this.тестируемНовуюЛибуToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -330,13 +319,13 @@
             this.сглаживаниеToolStripMenuItem1,
             this.фокусToolStripMenuItem});
             this.тестируемНовуюЛибуToolStripMenuItem.Name = "тестируемНовуюЛибуToolStripMenuItem";
-            this.тестируемНовуюЛибуToolStripMenuItem.Size = new System.Drawing.Size(147, 20);
-            this.тестируемНовуюЛибуToolStripMenuItem.Text = "Тестируем новую либу";
+            this.тестируемНовуюЛибуToolStripMenuItem.Size = new System.Drawing.Size(53, 20);
+            this.тестируемНовуюЛибуToolStripMenuItem.Text = "Ver 2.0";
             // 
             // дисторсияToolStripMenuItem1
             // 
             this.дисторсияToolStripMenuItem1.Name = "дисторсияToolStripMenuItem1";
-            this.дисторсияToolStripMenuItem1.Size = new System.Drawing.Size(152, 22);
+            this.дисторсияToolStripMenuItem1.Size = new System.Drawing.Size(177, 22);
             this.дисторсияToolStripMenuItem1.Text = "Дисторсия";
             this.дисторсияToolStripMenuItem1.Click += new System.EventHandler(this.дисторсияToolStripMenuItem1_Click);
             // 
@@ -360,6 +349,17 @@
             this.фокусToolStripMenuItem.Size = new System.Drawing.Size(177, 22);
             this.фокусToolStripMenuItem.Text = "Фокус";
             this.фокусToolStripMenuItem.Click += new System.EventHandler(this.фокусToolStripMenuItem_Click);
+            // 
+            // pictureBox1
+            // 
+            this.pictureBox1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.pictureBox1.Location = new System.Drawing.Point(0, 24);
+            this.pictureBox1.Name = "pictureBox1";
+            this.pictureBox1.Size = new System.Drawing.Size(1075, 665);
+            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.pictureBox1.TabIndex = 1;
+            this.pictureBox1.TabStop = false;
+            this.pictureBox1.Click += new System.EventHandler(this.pictureBox1_Click);
             // 
             // Form1
             // 

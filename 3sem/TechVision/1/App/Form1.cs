@@ -470,48 +470,64 @@ namespace App
         {
             try
             {
-                string path = Interaction.InputBox("Введите путь к каталогу с изображениями", "Путь к каталогу", @"C:\Users\Андрей\Desktop\DiamondB24");
-                await Task.Run(() =>
+                OpenFileDialog op = new OpenFileDialog();
+                op.Multiselect = true;
+                if(op.ShowDialog() == DialogResult.OK)
                 {
-                    List<Bitmap> images = new List<Bitmap>();
-                    DirectoryInfo dir = new DirectoryInfo(path);
-                    var files = dir.GetFiles();
-                    var fileNames = files.Select(item => int.Parse(item.Name.Replace(".bmp", ""))).ToArray();
-                    Array.Sort(fileNames);
-
-                    for (int i = 0; i < fileNames.Length; i++)
+                    await Task.Run(() =>
                     {
-                        images.Add((Bitmap)Bitmap.FromFile(Path.Combine(path, fileNames[i].ToString()) + ".bmp"));
-                    }
-
-                    int Width = images[0].Width;
-                    int Height = images[0].Height;
-
-                    Bitmap result = new Bitmap(Width, Height);
-                    List<double[,]> gray = new List<double[,]>();
-                    foreach (var image in images)
-                    {
-                        gray.Add(RgbImage.FromBitmap(image).ToGrayScale());
-                    }
-
-
-                    for (int y = 0; y < Height; y++)
-                    {
-                        for (int x = 0; x < Width; x++)
+                        try
                         {
-                            List<double> values = new List<double>();
-                            for (int i = 0; i < gray.Count; i++)
+                            List<Bitmap> images = new List<Bitmap>();
+
+                            var fileNames = op.FileNames;
+                            for (int i = 0; i < fileNames.Length; i++)
                             {
-                                values.Add(ImageProcessing.ImageWrapper.Focus(gray[i], x, y));
+                                images.Add((Bitmap)Bitmap.FromFile(fileNames[i]));
                             }
 
-                            int max = values.IndexOf(values.Max());
-                            result.SetPixel(x, y, images[max].GetPixel(x, y));
-                        }
-                    }
+                            int Width = images[0].Width;
+                            int Height = images[0].Height;
 
-                    Image = result;
-                });
+                            Bitmap result = new Bitmap(Width, Height);
+                            List<double[,]> gray = new List<double[,]>();
+                            foreach (var image in images)
+                            {
+                                gray.Add(RgbImage.FromBitmap(image).ToGrayScale());
+                            }
+
+
+                            for (int y = 0; y < Height; y++)
+                            {
+                                for (int x = 0; x < Width; x++)
+                                {
+                                    List<double> values = new List<double>();
+                                    for (int i = 0; i < gray.Count; i++)
+                                    {
+                                        values.Add(ImageProcessing.ImageWrapper.Focus(gray[i], x, y));
+                                    }
+
+                                    int max = values.IndexOf(values.Max());
+                                    result.SetPixel(x, y, images[max].GetPixel(x, y));
+                                }
+                            }
+
+                            Image = result;
+                        }
+                        catch (ArgumentOutOfRangeException ex)
+                        {
+                            MessageBox.Show("Изображения должны иметь одинаковый размер");
+                        }
+                        catch (IOException ex)
+                        {
+                            MessageBox.Show("Ошибка при открытии файлов");
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show(ex.Message);
+                        }
+                    });
+                }
             }
             catch (Exception ex)
             {
