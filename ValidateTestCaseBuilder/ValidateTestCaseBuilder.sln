@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30204.135
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ValidateTestCaseBuilder", "ValidateTestCaseBuilder\ValidateTestCaseBuilder.csproj", "{B7832916-DD3C-40A9-A1B3-8EBC55068ED3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExpressionEvaluatorLib", "ExpressionEvaluator\ExpressionEvaluatorLib.csproj", "{EA5413D1-2713-4C0C-9E18-465A78707558}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B7832916-DD3C-40A9-A1B3-8EBC55068ED3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B7832916-DD3C-40A9-A1B3-8EBC55068ED3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B7832916-DD3C-40A9-A1B3-8EBC55068ED3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B7832916-DD3C-40A9-A1B3-8EBC55068ED3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EA5413D1-2713-4C0C-9E18-465A78707558}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EA5413D1-2713-4C0C-9E18-465A78707558}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EA5413D1-2713-4C0C-9E18-465A78707558}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EA5413D1-2713-4C0C-9E18-465A78707558}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {A458B337-633C-4C10-994A-87CBBEC76BFB}
+	EndGlobalSection
+EndGlobal
