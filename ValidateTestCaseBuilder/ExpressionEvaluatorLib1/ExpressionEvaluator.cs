@@ -112,12 +112,21 @@ namespace ExpressionEvaluatorLib
                     }
                     else
                     {
-                        Operation head = operations.Peek() as Operation;
-                        if (head != null)
+                        do
                         {
+                            Operation head = operations.Peek() as Operation;
+                            if (head == null)
+                                break;
+
                             if (operation.Priority <= head.Priority)
+                            {
                                 OutArray.Add(operations.Pop());
-                        }
+                            }
+                            else
+                            {
+                                break;
+                            }
+                        } while (operations.Count != 0);
 
                         operations.Push(operation);
                     }
