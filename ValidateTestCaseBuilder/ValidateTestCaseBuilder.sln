@@ -5,7 +5,9 @@ VisualStudioVersion = 16.0.30204.135
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ValidateTestCaseBuilder", "ValidateTestCaseBuilder\ValidateTestCaseBuilder.csproj", "{B7832916-DD3C-40A9-A1B3-8EBC55068ED3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExpressionEvaluatorLib", "ExpressionEvaluator\ExpressionEvaluatorLib.csproj", "{EA5413D1-2713-4C0C-9E18-465A78707558}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ExpressionEvaluatorLibFirst", "ExpressionEvaluator\ExpressionEvaluatorLibFirst.csproj", "{EA5413D1-2713-4C0C-9E18-465A78707558}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExpressionEvaluatorLib", "ExpressionEvaluatorLib1\ExpressionEvaluatorLib.csproj", "{38AAC622-8587-44BD-8B7C-21D257AAF5D4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{EA5413D1-2713-4C0C-9E18-465A78707558}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EA5413D1-2713-4C0C-9E18-465A78707558}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EA5413D1-2713-4C0C-9E18-465A78707558}.Release|Any CPU.Build.0 = Release|Any CPU
+		{38AAC622-8587-44BD-8B7C-21D257AAF5D4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{38AAC622-8587-44BD-8B7C-21D257AAF5D4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{38AAC622-8587-44BD-8B7C-21D257AAF5D4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{38AAC622-8587-44BD-8B7C-21D257AAF5D4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
